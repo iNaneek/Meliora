@@ -178,6 +178,46 @@ def last_synced() -> str | None:
         return conn.execute("SELECT MAX(last_ok) FROM source_sync WHERE source LIKE 'open-meteo:%'").fetchone()[0]
 
 
+def today_line(place_id: str = "golden") -> dict | None:
+    """High/low for today, NWS sky words, and precip still expected today (range across models)."""
+    today, now = date.today().isoformat(), datetime.now().strftime("%Y-%m-%dT%H:00")
+    with db.connect() as conn:
+        temps = {m: (hi, lo) for m, hi, lo in conn.execute(
+            """SELECT model, MAX(temp_c), MIN(temp_c) FROM weather_hourly
+               WHERE place_id = ? AND time LIKE ? AND temp_c IS NOT NULL GROUP BY model""",
+            (place_id, today + "%"))}
+        rest = conn.execute(
+            """SELECT model, SUM(precip_mm), SUM(snow_cm) FROM weather_hourly
+               WHERE place_id = ? AND time LIKE ? AND time >= ? GROUP BY model""",
+            (place_id, today + "%", now)).fetchall()
+        sky = conn.execute("SELECT short FROM nws_forecast WHERE place_id = ? ORDER BY number LIMIT 1",
+                           (place_id,)).fetchone()
+    temp = temps.get("ncep_nam_conus") or temps.get("ecmwf_ifs025")
+    if not temp:
+        return None
+    f = lambda c: round(c * 9 / 5 + 32)
+    snow_in = sorted((s or 0) / 2.54 for _, _, s in rest)
+    rain_in = sorted((p or 0) / 25.4 for _, p, _ in rest)
+    precip = None
+    if snow_in and snow_in[-1] >= 0.1:
+        precip = _amount(snow_in, 0) + " snow"
+    elif rain_in and rain_in[-1] >= 0.01:
+        precip = _amount(rain_in, 2) + " rain"
+    return {"high_f": f(temp[0]), "low_f": f(temp[1]), "sky": sky[0] if sky else None, "precip": precip}
+
+
+def _amount(vals: list[float], digits: int) -> str:
+    """'.23"', '.1–.3"', or 'up to 5"' when one model expects nothing."""
+    def fmt(v: float) -> str:
+        if digits == 0:  # snow: whole inches, but a dusting isn't 0
+            return "<1" if v < 1 else f"{v:.0f}"
+        return f"{v:.{digits}f}".lstrip("0")
+    lo, hi = vals[0], vals[-1]
+    if round(lo, digits) == 0 and (digits or lo < 0.1):
+        return f'up to {fmt(hi)}"'
+    return f'{fmt(lo)}–{fmt(hi)}"' if fmt(lo) != fmt(hi) else f'{fmt(hi)}"'
+
+
 # ---------- quick look (sanity check, not the real feature yet) ----------
 
 def snow_totals(kind: str, start: datetime, end: datetime) -> list[tuple[str, dict[str, float]]]:

@@ -36,7 +36,8 @@ class Api:
         return self.today()
 
     def sources(self) -> dict:
-        return {"weather": weather.last_synced(), "weather_busy": _weather_busy.is_set()}
+        return {"weather": weather.last_synced(), "weather_busy": _weather_busy.is_set(),
+                "today": weather.today_line()}
 
     def ask(self, text: str) -> str:
         state = self.today()

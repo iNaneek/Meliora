@@ -1,5 +1,5 @@
 // Sky engine: sun elevation over Golden, CO → sky gradient, accents, and ink colors.
-// Pure presentation. Exposes window.Sky = { elevation, paint, phaseName, sunTimes }.
+// Pure presentation. Exposes window.Sky = { elevation, paint, phaseName, dayStrip, scatterStars }.
 (function () {
   var LAT = 39.7555, LON = -105.2211;
   var rad = Math.PI / 180;
@@ -17,18 +17,6 @@
     var s = Math.sin(LAT * rad) * Math.sin(decl * rad) +
             Math.cos(LAT * rad) * Math.cos(decl * rad) * Math.cos(hour * rad);
     return { el: Math.asin(s) / rad, rising: hour < 0, hour: hour };
-  }
-
-  function sunTimes(day) {
-    var d = new Date(day); d.setHours(0, 0, 0, 0);
-    var prev = elevation(d).el, out = {};
-    for (var m = 1; m < 1440; m++) {
-      var t = new Date(d.getTime() + m * 6e4), e = elevation(t).el;
-      if (prev < 0 && e >= 0) out.rise = t;
-      if (prev >= 0 && e < 0) out.set = t;
-      prev = e;
-    }
-    return out;
   }
 
   // Phase anchors: [elevation, sky top, sky bottom]. Colors interpolate between neighbours.
@@ -133,6 +121,6 @@
     svg.innerHTML = out;
   }
 
-  window.Sky = { elevation: elevation, paint: paint, phaseName: phaseName, sunTimes: sunTimes,
+  window.Sky = { elevation: elevation, paint: paint, phaseName: phaseName,
                  dayStrip: dayStrip, scatterStars: scatterStars };
 })();

@@ -110,14 +110,14 @@
       var fresh = t && (Date.now() - t) < 6 * 3600e3;
       el.className = 'src' + (fresh ? '' : ' off');
       el.innerHTML = '<i></i>Weather · ' + label;
+      var w = src.today;
+      $('wx').textContent = w ? ['Golden', w.high_f + '° / ' + w.low_f + '°', w.sky, w.precip].filter(Boolean).join(' · ') : 'Golden';
     });
   }
 
   // ---------- boot ----------
   Sky.scatterStars();
   $('slider').style.setProperty('--track', Sky.dayStrip(new Date()));
-  var t = Sky.sunTimes(new Date());
-  $('suntimes').textContent = 'Golden · sunrise ' + (t.rise ? clock(t.rise) : '–') + ' · sunset ' + (t.set ? clock(t.set) : '–');
   setLive(true);
   window.addEventListener('resize', function () { skyAt(+$('slider').value); });
   setInterval(function () { if (live) setLive(true); }, 30000);
