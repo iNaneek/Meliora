@@ -1,0 +1,342 @@
+# Meliora settings. Edit freely; the app re-reads this on each run.
+
+[weather]
+# Open-Meteo models pulled for every place (free, no key). Keenan uses ECMWF and NAM;
+# his phone covers the rest. Meliora only needs these to raise alerts.
+models = ["ecmwf_ifs025", "ncep_nam_conus"]
+forecast_days = 14
+refresh_hours = 3          # the app refetches on launch if the cache is older than this
+nws_user_agent = "meliora-personal-assistant"
+
+# kind: home | peak | resort. elev_m is what the forecast is downscaled to
+# (summit for peaks, upper mountain for resorts).
+[[places]]
+id = "golden"
+name = "Golden"
+kind = "home"
+lat = 39.7555
+lon = -105.2211
+elev_m = 1730
+
+# ---- 14ers ----
+[[places]]
+id = "grays"
+name = "Grays Peak"
+kind = "peak"
+range = "Front"
+lat = 39.6339
+lon = -105.8176
+elev_m = 4350
+
+[[places]]
+id = "torreys"
+name = "Torreys Peak"
+kind = "peak"
+range = "Front"
+lat = 39.6428
+lon = -105.8212
+elev_m = 4349
+
+[[places]]
+id = "blue_sky"
+name = "Mount Blue Sky"
+kind = "peak"
+range = "Front"
+lat = 39.5883
+lon = -105.6438
+elev_m = 4348
+
+[[places]]
+id = "bierstadt"
+name = "Mount Bierstadt"
+kind = "peak"
+range = "Front"
+lat = 39.5826
+lon = -105.6688
+elev_m = 4285
+
+[[places]]
+id = "longs"
+name = "Longs Peak"
+kind = "peak"
+range = "Front"
+lat = 40.2550
+lon = -105.6151
+elev_m = 4346
+
+[[places]]
+id = "pikes"
+name = "Pikes Peak"
+kind = "peak"
+range = "Front"
+lat = 38.8405
+lon = -105.0442
+elev_m = 4302
+
+[[places]]
+id = "quandary"
+name = "Quandary Peak"
+kind = "peak"
+range = "Tenmile"
+lat = 39.3972
+lon = -106.1064
+elev_m = 4350
+
+[[places]]
+id = "lincoln"
+name = "Mount Lincoln"
+kind = "peak"
+range = "Mosquito"
+lat = 39.3515
+lon = -106.1116
+elev_m = 4354
+
+[[places]]
+id = "democrat"
+name = "Mount Democrat"
+kind = "peak"
+range = "Mosquito"
+lat = 39.3396
+lon = -106.1399
+elev_m = 4312
+
+[[places]]
+id = "bross"
+name = "Mount Bross"
+kind = "peak"
+range = "Mosquito"
+lat = 39.3353
+lon = -106.1075
+elev_m = 4320
+
+[[places]]
+id = "sherman"
+name = "Mount Sherman"
+kind = "peak"
+range = "Mosquito"
+lat = 39.2250
+lon = -106.1698
+elev_m = 4278
+
+[[places]]
+id = "elbert"
+name = "Mount Elbert"
+kind = "peak"
+range = "Sawatch"
+lat = 39.1178
+lon = -106.4454
+elev_m = 4401
+
+[[places]]
+id = "massive"
+name = "Mount Massive"
+kind = "peak"
+range = "Sawatch"
+lat = 39.1875
+lon = -106.4757
+elev_m = 4398
+
+[[places]]
+id = "la_plata"
+name = "La Plata Peak"
+kind = "peak"
+range = "Sawatch"
+lat = 39.0294
+lon = -106.4729
+elev_m = 4370
+
+[[places]]
+id = "harvard"
+name = "Mount Harvard"
+kind = "peak"
+range = "Sawatch"
+lat = 38.9244
+lon = -106.3207
+elev_m = 4395
+
+[[places]]
+id = "yale"
+name = "Mount Yale"
+kind = "peak"
+range = "Sawatch"
+lat = 38.8442
+lon = -106.3138
+elev_m = 4327
+
+[[places]]
+id = "princeton"
+name = "Mount Princeton"
+kind = "peak"
+range = "Sawatch"
+lat = 38.7492
+lon = -106.2424
+elev_m = 4327
+
+[[places]]
+id = "holy_cross"
+name = "Mount of the Holy Cross"
+kind = "peak"
+range = "Sawatch"
+lat = 39.4668
+lon = -106.4817
+elev_m = 4270
+
+[[places]]
+id = "capitol"
+name = "Capitol Peak"
+kind = "peak"
+range = "Elk"
+lat = 39.1503
+lon = -107.0829
+elev_m = 4307
+
+[[places]]
+id = "maroon"
+name = "Maroon Peak"
+kind = "peak"
+range = "Elk"
+lat = 39.0708
+lon = -106.9890
+elev_m = 4315
+
+[[places]]
+id = "uncompahgre"
+name = "Uncompahgre Peak"
+kind = "peak"
+range = "San Juan"
+lat = 38.0717
+lon = -107.4621
+elev_m = 4365
+
+[[places]]
+id = "sneffels"
+name = "Mount Sneffels"
+kind = "peak"
+range = "San Juan"
+lat = 38.0038
+lon = -107.7923
+elev_m = 4315
+
+[[places]]
+id = "wilson_peak"
+name = "Wilson Peak"
+kind = "peak"
+range = "San Juan"
+lat = 37.8603
+lon = -107.9847
+elev_m = 4274
+
+[[places]]
+id = "blanca"
+name = "Blanca Peak"
+kind = "peak"
+range = "Sangre de Cristo"
+lat = 37.5775
+lon = -105.4856
+elev_m = 4374
+
+[[places]]
+id = "crestone"
+name = "Crestone Peak"
+kind = "peak"
+range = "Sangre de Cristo"
+lat = 37.9668
+lon = -105.5855
+elev_m = 4357
+
+# ---- Resorts ----
+[[places]]
+id = "abasin"
+name = "Arapahoe Basin"
+kind = "resort"
+lat = 39.6425
+lon = -105.8719
+elev_m = 3650
+
+[[places]]
+id = "loveland"
+name = "Loveland"
+kind = "resort"
+lat = 39.6800
+lon = -105.8979
+elev_m = 3500
+
+[[places]]
+id = "keystone"
+name = "Keystone"
+kind = "resort"
+lat = 39.6045
+lon = -105.9541
+elev_m = 3350
+
+[[places]]
+id = "breck"
+name = "Breckenridge"
+kind = "resort"
+lat = 39.4800
+lon = -106.0667
+elev_m = 3400
+
+[[places]]
+id = "copper"
+name = "Copper Mountain"
+kind = "resort"
+lat = 39.5022
+lon = -106.1511
+elev_m = 3350
+
+[[places]]
+id = "winter_park"
+name = "Winter Park"
+kind = "resort"
+lat = 39.8868
+lon = -105.7625
+elev_m = 3200
+
+[[places]]
+id = "eldora"
+name = "Eldora"
+kind = "resort"
+lat = 39.9372
+lon = -105.5827
+elev_m = 3050
+
+[[places]]
+id = "vail"
+name = "Vail"
+kind = "resort"
+lat = 39.6061
+lon = -106.3550
+elev_m = 3200
+
+[[places]]
+id = "beaver_creek"
+name = "Beaver Creek"
+kind = "resort"
+lat = 39.6042
+lon = -106.5165
+elev_m = 3200
+
+[[places]]
+id = "steamboat"
+name = "Steamboat"
+kind = "resort"
+lat = 40.4572
+lon = -106.8045
+elev_m = 2900
+
+[[places]]
+id = "snowmass"
+name = "Snowmass"
+kind = "resort"
+lat = 39.2084
+lon = -106.9490
+elev_m = 3200
+
+[[places]]
+id = "wolf_creek"
+name = "Wolf Creek"
+kind = "resort"
+lat = 37.4722
+lon = -106.7933
+elev_m = 3350

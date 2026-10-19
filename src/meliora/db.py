@@ -14,6 +14,62 @@ CREATE TABLE IF NOT EXISTS pencil_decisions (
     decided_at TEXT NOT NULL DEFAULT (datetime('now', 'localtime')),
     PRIMARY KEY (day, block_id)
 );
+CREATE TABLE IF NOT EXISTS places (
+    id     TEXT PRIMARY KEY,
+    name   TEXT NOT NULL,
+    kind   TEXT NOT NULL,              -- home | peak | resort
+    range  TEXT,
+    lat    REAL NOT NULL,
+    lon    REAL NOT NULL,
+    elev_m REAL NOT NULL
+);
+-- Latest run of each model only; a refetch replaces that model's rows.
+-- Metric units, local Denver time.
+CREATE TABLE IF NOT EXISTS weather_hourly (
+    place_id     TEXT NOT NULL,
+    model        TEXT NOT NULL,
+    time         TEXT NOT NULL,
+    temp_c       REAL,
+    feels_c      REAL,
+    precip_mm    REAL,
+    snow_cm      REAL,
+    snow_depth_m REAL,
+    freezing_m   REAL,
+    code         INTEGER,              -- WMO weather code
+    cloud_pct    REAL,
+    gust_kmh     REAL,
+    cape         REAL,                 -- J/kg; thunderstorm fuel
+    PRIMARY KEY (place_id, model, time)
+);
+CREATE TABLE IF NOT EXISTS nws_alerts (
+    id        TEXT PRIMARY KEY,
+    event     TEXT,
+    severity  TEXT,
+    headline  TEXT,
+    area_desc TEXT,
+    onset     TEXT,
+    ends      TEXT
+);
+CREATE TABLE IF NOT EXISTS nws_forecast (
+    place_id TEXT NOT NULL,
+    number   INTEGER NOT NULL,
+    name     TEXT,
+    start    TEXT,
+    end      TEXT,
+    temp     INTEGER,
+    temp_unit TEXT,
+    wind     TEXT,
+    short    TEXT,
+    detailed TEXT,
+    PRIMARY KEY (place_id, number)
+);
+-- Per-source "last synced" for the footer (degrade honestly).
+CREATE TABLE IF NOT EXISTS source_sync (
+    source   TEXT PRIMARY KEY,
+    last_ok  TEXT,
+    last_try TEXT,
+    detail   TEXT
+);
 """
 
 
@@ -48,3 +104,4 @@ def clear_decisions(day: str) -> None:
 def clear_decision(day: str, block_id: str) -> None:
     with connect() as conn:
         conn.execute("DELETE FROM pencil_decisions WHERE day = ? AND block_id = ?", (day, block_id))
+

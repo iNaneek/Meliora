@@ -1,12 +1,14 @@
 """The Meliora window: pywebview (WKWebView) with a Python js_api."""
 
+import logging
 import os
+import threading
 from datetime import date, datetime
 from pathlib import Path
 
 import webview
 
-from meliora import db, rules
+from meliora import db, rules, weather
 
 UI = Path(__file__).parent / "ui" / "index.html"
 
@@ -33,6 +35,9 @@ class Api:
         db.clear_decisions(date.today().isoformat())
         return self.today()
 
+    def sources(self) -> dict:
+        return {"weather": weather.last_synced(), "weather_busy": _weather_busy.is_set()}
+
     def ask(self, text: str) -> str:
         state = self.today()
         nxt = state["next"]
@@ -54,7 +59,25 @@ def _set_app_name(name: str) -> None:
         pass
 
 
+_weather_busy = threading.Event()
+
+
+def _refresh_weather() -> None:
+    """Runs off the UI thread; on failure the cached copy stays and the sidebar says when it's from."""
+    if not weather.is_stale():
+        return
+    _weather_busy.set()
+    try:
+        logging.info("weather refresh: %s", weather.refresh())
+    except Exception:
+        logging.exception("weather refresh failed")
+    finally:
+        _weather_busy.clear()
+
+
 def run() -> None:
+    logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
+    threading.Thread(target=_refresh_weather, daemon=True).start()
     _set_app_name("Meliora")
     webview.create_window(
         "Meliora",

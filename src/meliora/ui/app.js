@@ -98,6 +98,21 @@
     api.ask(q).then(function (a) { var p = msgs.querySelector('.pending'); p.textContent = a; p.classList.remove('pending'); msgs.scrollTop = 1e6; });
   };
 
+  // Per-source "last synced". Stale is shown, not hidden: the app keeps working on the cache.
+  function renderSources() {
+    api.sources().then(function (src) {
+      var el = $('src-weather'), t = src.weather && new Date(src.weather), label;
+      if (!t) label = src.weather_busy ? 'syncing…' : 'not synced yet';
+      else {
+        var day = t.toDateString() === new Date().toDateString() ? '' : t.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) + ' ';
+        label = (src.weather_busy ? 'syncing… last ' : '') + day + clock(t);
+      }
+      var fresh = t && (Date.now() - t) < 6 * 3600e3;
+      el.className = 'src' + (fresh ? '' : ' off');
+      el.innerHTML = '<i></i>Weather · ' + label;
+    });
+  }
+
   // ---------- boot ----------
   Sky.scatterStars();
   $('slider').style.setProperty('--track', Sky.dayStrip(new Date()));
@@ -112,6 +127,7 @@
     api.today().then(function (s) { render(s, false); $('bridge').innerHTML = '<i></i>Python bridge ok'; })
       .catch(function (err) { $('sentence').textContent = 'Python bridge error: ' + err; });
     setInterval(function () { api.today().then(function (s) { render(s, true); }); }, 60000);
+    renderSources(); setInterval(renderSources, 20000);
   }
   if (window.pywebview && window.pywebview.api) boot();
   else window.addEventListener('pywebviewready', boot);

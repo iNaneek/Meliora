@@ -8,6 +8,7 @@ Keenan's personal assistant. See `CLAUDE.md` for the plan and `docs/` for the de
 uv run meliora                 # from Terminal
 MELIORA_DEBUG=1 uv run meliora # with right-click → Inspect Element
 ./scripts/make_app.sh          # (re)build ~/Applications/Meliora.app
+uv run meliora-weather         # fetch weather now and print a snow summary
 ```
 
 The `.app` is a thin launcher that runs the code in this repo, so edits to
@@ -16,6 +17,7 @@ The `.app` is a thin launcher that runs the code in this repo, so edits to
 ## Layout
 
 - `src/meliora/rules.py` decides The Sentence from the day's blocks and the clock (demo day for now).
+- `src/meliora/weather.py` pulls ECMWF + NAM (Open-Meteo) for every place in `config.toml`, plus NWS alerts and Golden's NWS forecast. The app refreshes it in the background on launch when it's over 3 h old.
 - `src/meliora/db.py` is SQLite in `data/` (gitignored).
 - `src/meliora/app.py` is the pywebview window. Methods on `Api` are callable from JS as `pywebview.api.*`.
 - `src/meliora/ui/` holds the HTML, CSS and JS front end, ported from `docs/mockup.html`.
