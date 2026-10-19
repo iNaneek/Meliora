@@ -17,17 +17,16 @@
   // ---------- sky + slider ----------
   function skyAt(min) {
     var d = new Date(); d.setHours(0, 0, 0, 0); d.setMinutes(min);
-    var p = Sky.paint(d);
-    $('phase').textContent = p.phase;
-    $('readout').textContent = clock(d) + ' · ' + p.phase + ' · sun ' + p.el.toFixed(1) + '°';
+    $('phase').textContent = Sky.paint(d).phase;
+    $('time').textContent = clock(d);
   }
   function nowMin() { var n = new Date(); return n.getHours() * 60 + n.getMinutes(); }
   function setLive(on) {
-    live = on; $('live').setAttribute('aria-pressed', on);
+    live = on; $('time').classList.toggle('scrubbed', !on);
     if (on) { $('slider').value = nowMin(); skyAt(nowMin()); }
   }
   $('slider').addEventListener('input', function () { if (live) setLive(false); skyAt(+this.value); });
-  $('live').onclick = function () { setLive(true); };
+  $('time').onclick = function () { setLive(true); };
 
   // ---------- render from Python state ----------
   function render(s, animate) {

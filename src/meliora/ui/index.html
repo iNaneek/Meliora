@@ -49,6 +49,10 @@
       <a class="nav">Peaks</a>
       <a class="nav">Rest</a>
     </nav>
+    <div class="scrub">
+      <input type="range" id="slider" min="0" max="1439" step="1" aria-label="Time of day for the sky">
+      <button class="time" id="time" title="Back to the real time"></button>
+    </div>
     <div class="why">Your "why" (example)<em>"Every Colorado 14er, and a body that can do anything."</em></div>
     <div class="sources">
       <div class="src off"><i></i>Calendar · not connected</div>
@@ -90,12 +94,6 @@
     </aside>
   </main>
 
-  <footer class="scrub glass">
-    <span class="scrub-l">Sky</span>
-    <input type="range" id="slider" min="0" max="1439" step="1" aria-label="Time of day for the sky">
-    <span class="readout" id="readout"></span>
-    <button class="btn ghost" id="live" aria-pressed="true">Live</button>
-  </footer>
   <div class="toast" id="toast"></div>
 </div>
 
