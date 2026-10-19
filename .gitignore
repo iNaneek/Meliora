@@ -1,0 +1,19 @@
+# Python
+__pycache__/
+*.pyc
+.venv/
+*.egg-info/
+build/
+dist/
+
+# Local data, never commit
+data/
+*.sqlite
+*.sqlite3
+*.db
+*.log
+.env
+secrets*
+
+# macOS
+.DS_Store

@@ -1,0 +1,423 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Meliora</title>
+<meta name="viewport" content="width=1440">
+<style>
+/* Layout: native Mac three-zone window. Sidebar | sentence + horizon + (day timeline | cards) | source footer. Chat is a drawer. */
+:root{
+  --bg:#F3F2F7; --win:#FBFBFD; --side:#E9E8F0; --line:#DCDAE6; --line2:#E8E6EF;
+  --fg:#1C1B24; --muted:#6C6A7B; --faint:#9A98A8;
+  --violet:#5B4BC4; --violet-soft:#E6E2FA;       /* Columbine: confirmed, primary */
+  --gold:#B7801A; --gold-soft:#FBF1DC;           /* Aspen: pencil proposals */
+  --spruce:#2F7D6E; --spruce-soft:#DDEFEA;       /* rest */
+  --ember:#C24F3A; --ember-soft:#F8E3DE;          /* crunch / warning */
+  --ok:#3E8E5A; --warn:#C08A1E;
+  --hatch:#ECEAF2;
+  --serif: ui-serif, "New York", "Iowan Old Style", Georgia, serif;
+  --sans: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", system-ui, sans-serif;
+  --mono: ui-monospace, "SF Mono", Menlo, monospace;
+}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
+  --bg:#0E0D13; --win:#17161E; --side:#1D1C26; --line:#2E2C3A; --line2:#25232F;
+  --fg:#ECEAF4; --muted:#A4A1B5; --faint:#6F6C80;
+  --violet:#9C8FF2; --violet-soft:#2A2547; --gold:#E2B04F; --gold-soft:#33291A;
+  --spruce:#5FC0AC; --spruce-soft:#16302B; --ember:#EE7A63; --ember-soft:#3A1F1A;
+  --ok:#6CC28A; --warn:#E2B04F; --hatch:#211F2A; color-scheme:dark }}
+:root[data-theme="dark"]{
+  --bg:#0E0D13; --win:#17161E; --side:#1D1C26; --line:#2E2C3A; --line2:#25232F;
+  --fg:#ECEAF4; --muted:#A4A1B5; --faint:#6F6C80;
+  --violet:#9C8FF2; --violet-soft:#2A2547; --gold:#E2B04F; --gold-soft:#33291A;
+  --spruce:#5FC0AC; --spruce-soft:#16302B; --ember:#EE7A63; --ember-soft:#3A1F1A;
+  --ok:#6CC28A; --warn:#E2B04F; --hatch:#211F2A; color-scheme:dark }
+
+*{box-sizing:border-box}
+html,body{margin:0;height:100%}
+body{background:var(--bg);color:var(--fg);font:13px/1.4 var(--sans);-webkit-font-smoothing:antialiased}
+button{font:inherit;color:inherit;cursor:pointer}
+button:focus-visible{outline:2px solid var(--violet);outline-offset:2px}
+.num{font-family:var(--mono);font-variant-numeric:tabular-nums}
+
+.window{width:1440px;height:900px;margin:0 auto;background:var(--win);display:grid;grid-template-rows:38px minmax(0,1fr) 28px;overflow:hidden;position:relative}
+.titlebar{display:flex;align-items:center;gap:8px;padding:0 14px;border-bottom:1px solid var(--line);background:var(--side)}
+.lights{display:flex;gap:8px}.lights i{width:12px;height:12px;border-radius:50%;display:block;background:#E5675B}.lights i:nth-child(2){background:#E9B53F}.lights i:nth-child(3){background:#5FC152}
+.titlebar .t{flex:1;text-align:center;color:var(--muted);font-weight:600;font-size:12.5px}
+
+.body{display:grid;grid-template-columns:196px 1fr;min-height:0;overflow:hidden}
+.side{background:var(--side);border-right:1px solid var(--line);padding:16px 10px;display:flex;flex-direction:column;gap:2px}
+.brand{display:flex;align-items:center;gap:8px;padding:0 8px 14px;font-weight:700;font-size:15px;letter-spacing:.2px}
+.brand svg{flex:none}
+.nav{display:flex;justify-content:space-between;padding:6px 10px;border-radius:7px;color:var(--fg);font-weight:500}
+.nav.on{background:var(--violet-soft);color:var(--violet)}
+.nav b{font-weight:600;color:var(--muted);font-size:11px}
+.side h6{margin:16px 10px 4px;font-size:10.5px;letter-spacing:.8px;text-transform:uppercase;color:var(--faint)}
+.scm{padding:5px 10px;font-size:12px;line-height:1.3;border-left:2px solid var(--line);margin:2px 0 2px 10px}
+.scm b{font-family:var(--mono);font-weight:500;color:var(--muted);font-size:11px;margin-left:4px}
+.scm span{display:flex;gap:4px;margin-top:4px}
+.scm button{border:1px solid var(--line);background:none;border-radius:5px;padding:0 6px;font-size:10.5px;color:var(--muted)}
+.scm.empty{color:var(--faint);font-style:italic}
+.side .why{margin-top:auto;padding:10px;border-radius:9px;border:1px solid var(--line);color:var(--muted);font-size:11.5px}
+.side .why em{font-family:var(--serif);font-style:italic;color:var(--fg);font-size:13px;display:block;margin-top:4px}
+
+.main{display:grid;grid-template-rows:auto auto auto auto minmax(0,1fr);min-height:0;position:relative}
+.toolbar{display:flex;align-items:center;gap:10px;padding:10px 22px;border-bottom:1px solid var(--line2)}
+.toolbar .date{font-weight:600}
+.toolbar .date span{color:var(--muted);font-weight:400;margin-left:6px}
+.spacer{flex:1}
+.seg{display:flex;background:var(--side);border:1px solid var(--line);border-radius:8px;padding:2px}
+.seg button{border:0;background:none;padding:4px 10px;border-radius:6px;font-size:12px;color:var(--muted)}
+.seg button.on{background:var(--win);color:var(--fg);box-shadow:0 1px 2px rgba(0,0,0,.12)}
+.tbtn{border:1px solid var(--line);background:var(--win);border-radius:8px;padding:5px 11px;font-size:12px}
+.tbtn.primary{background:var(--violet);border-color:var(--violet);color:var(--win)}
+.tbtn.ghost{background:none}
+.tbtn[aria-pressed="true"]{background:var(--spruce-soft);border-color:var(--spruce);color:var(--spruce)}
+
+.hero{display:grid;grid-template-columns:1fr 392px;gap:26px;padding:14px 22px 12px;align-items:end}
+.sentence{font-family:var(--serif);font-size:28px;line-height:1.22;letter-spacing:-.2px;margin:0;text-wrap:balance}
+.sentence mark{background:none;color:var(--violet)}
+.because{margin-top:8px;color:var(--muted);font-size:12.5px;display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.chip{display:inline-flex;align-items:center;gap:4px;font-family:var(--mono);font-size:11px;padding:1px 7px;border-radius:5px;background:var(--side);border:1px solid var(--line);color:var(--fg)}
+.next{border:1px solid var(--line);border-radius:12px;padding:12px 14px;background:var(--win);box-shadow:0 1px 0 var(--line2)}
+.next .lbl{font-size:10.5px;letter-spacing:.8px;text-transform:uppercase;color:var(--muted)}
+.next .what{font-size:15px;font-weight:600;margin:3px 0 2px}
+.next .meta{color:var(--muted);font-size:12px}
+.next .acts{display:flex;gap:8px;margin-top:10px}
+
+.horizon{padding:0 22px 12px}
+.hz{border:1px solid var(--line2);border-radius:10px;padding:10px 12px;display:grid;grid-template-columns:118px 1fr 250px;gap:14px;align-items:center}
+.hz h4{margin:0;font-size:10.5px;letter-spacing:.8px;text-transform:uppercase;color:var(--muted);font-weight:600}
+.hz h4 small{display:block;letter-spacing:0;text-transform:none;font-weight:400;font-size:11.5px;margin-top:2px;color:var(--faint)}
+.days{display:grid;grid-template-columns:repeat(21,1fr);gap:3px;align-items:end;height:46px;position:relative}
+.d{border-radius:3px;background:var(--violet);opacity:.25;position:relative}
+.d.today{outline:2px solid var(--fg);outline-offset:1px}
+.d.l2{opacity:.45}.d.l3{opacity:.7}.d.crunch{background:var(--ember);opacity:.9}
+.d.wk{background:var(--faint);opacity:.18}
+.wkl{display:grid;grid-template-columns:repeat(3,1fr);font-size:10.5px;color:var(--faint);margin-top:4px;font-family:var(--mono)}
+.warn{background:var(--ember-soft);border-radius:8px;padding:8px 10px;font-size:12px;line-height:1.35}
+.warn b{color:var(--ember)}
+.warn button{margin-top:6px;border:1px solid var(--ember);background:none;color:var(--ember);border-radius:6px;padding:2px 8px;font-size:11.5px}
+
+.split{display:grid;grid-template-columns:1fr 392px;gap:26px;padding:0 22px 0;min-height:0}
+.panelh{display:flex;justify-content:space-between;align-items:baseline;margin:2px 0 8px}
+.panelh h3{margin:0;font-size:10.5px;letter-spacing:.8px;text-transform:uppercase;color:var(--muted);font-weight:600}
+.legend{display:flex;gap:12px;font-size:11px;color:var(--muted)}
+.legend i{display:inline-block;width:14px;height:9px;border-radius:2px;margin-right:4px;vertical-align:-1px}
+.lg-ink{background:var(--violet)}.lg-pen{border:1.5px dashed var(--gold)}.lg-rest{background:var(--spruce)}
+
+.day{position:relative;height:418px;overflow:hidden;border-top:1px solid var(--line2)}
+.hr{position:absolute;left:0;right:0;border-top:1px solid var(--line2);font-family:var(--mono);font-size:10px;color:var(--faint)}
+.hr span{position:absolute;top:-7px;left:0;background:var(--win);padding-right:6px}
+.blk{position:absolute;left:52px;right:0;border-radius:6px;padding:3px 9px;font-size:12px;display:flex;align-items:center;gap:8px;overflow:hidden;white-space:nowrap}
+.blk .tm{font-family:var(--mono);font-size:10.5px;color:inherit;opacity:.75}
+.blk .sub{color:var(--muted);font-size:11px;overflow:hidden;text-overflow:ellipsis}
+.ink{background:var(--violet-soft);border-left:3px solid var(--violet)}
+.prot{background:repeating-linear-gradient(135deg,var(--hatch) 0 6px,transparent 6px 12px);border-left:3px solid var(--faint);color:var(--muted)}
+.pen{background:var(--gold-soft);border:1.5px dashed var(--gold);color:var(--fg)}
+.pen .tag{font-size:10px;letter-spacing:.6px;text-transform:uppercase;color:var(--gold);font-weight:700}
+.pen .pa{margin-left:auto;display:flex;gap:5px}
+.pen .pa button{border:1px solid var(--gold);background:none;border-radius:5px;padding:1px 7px;font-size:11px;color:var(--gold)}
+.pen .pa button.y{background:var(--gold);color:var(--win)}
+.pen.done{background:var(--violet-soft);border:0;border-left:3px solid var(--violet)}
+.pen.done .tag,.pen.done .pa{display:none}
+.pen.gone{opacity:.0;pointer-events:none;transition:opacity .25s}
+.rest{background:var(--spruce-soft);border-left:3px solid var(--spruce);color:var(--fg)}
+.rest .sub{color:var(--spruce)}
+.now{position:absolute;left:44px;right:0;border-top:2px solid var(--ember)}
+.now::before{content:"";position:absolute;left:-4px;top:-5px;width:8px;height:8px;border-radius:50%;background:var(--ember)}
+.endline{position:absolute;left:52px;right:0;font-family:var(--serif);font-style:italic;color:var(--muted);font-size:13px}
+
+.cards{display:flex;flex-direction:column;gap:10px;min-height:0;overflow:hidden}
+.card{border:1px solid var(--line);border-radius:12px;padding:11px 13px}
+.card h3{margin:0;font-size:10.5px;letter-spacing:.8px;text-transform:uppercase;color:var(--muted);font-weight:600;display:flex;justify-content:space-between}
+.card h3 span{text-transform:none;letter-spacing:0;font-weight:400;color:var(--faint)}
+.call{display:flex;gap:12px;align-items:center;margin-top:6px}
+.verdict{font-weight:800;font-size:22px;letter-spacing:1px;color:var(--warn);line-height:1}
+.call p{margin:0;font-size:12.5px}
+.inputs{display:grid;grid-template-columns:1fr 1.25fr 1fr 1fr;gap:6px;margin-top:8px}
+.in{font-size:10.5px;color:var(--muted)}
+.in b{display:block;font-family:var(--mono);font-weight:500;color:var(--fg);font-size:12px}
+.dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--ok);margin-right:3px}
+.dot.lo{background:var(--warn)}
+.feel{display:flex;align-items:center;gap:5px;margin-top:8px;font-size:11.5px;color:var(--muted)}
+.feel button{width:24px;height:22px;border:1px solid var(--line);background:none;border-radius:5px;font-size:11px}
+.feel button.on{background:var(--violet);border-color:var(--violet);color:var(--win)}
+.bar{height:7px;border-radius:4px;background:var(--line2);overflow:hidden;display:flex;margin:7px 0 6px}
+.bar i{display:block;height:100%}
+.jobrow{display:flex;justify-content:space-between;font-size:12px}
+.windows{margin-top:4px;font-size:11.5px;color:var(--muted)}
+.windows b{color:var(--fg);font-weight:500}
+.rest2{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:6px}
+.rest2 div{font-size:11px;color:var(--muted)}
+.rest2 b{display:block;font-family:var(--mono);font-size:15px;font-weight:500}
+.rest2 .c b{color:var(--spruce)}.rest2 .dr b{color:var(--ember)}
+.roast{font-family:var(--serif);font-style:italic;font-size:13px;margin:7px 0 0;line-height:1.35}
+.optin{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--faint);margin-top:6px}
+.sw{width:26px;height:15px;border-radius:9px;background:var(--spruce);position:relative;border:0;padding:0}
+.sw::after{content:"";position:absolute;width:11px;height:11px;border-radius:50%;background:var(--win);top:2px;left:13px;transition:left .15s}
+.sw[aria-pressed="false"]{background:var(--line)}.sw[aria-pressed="false"]::after{left:2px}
+.cm{display:flex;align-items:center;gap:8px;font-size:12.5px;padding:5px 0;border-top:1px solid var(--line2)}
+.cm:first-of-type{border-top:0}
+.cm .p{margin-left:auto;font-family:var(--mono);font-size:11px;color:var(--muted)}
+.cm .acts{display:flex;gap:4px;margin-left:auto}
+.cm .acts button{border:1px solid var(--line);background:none;border-radius:5px;padding:0 6px;font-size:10.5px;color:var(--muted)}
+.cm.empty{color:var(--faint);font-style:italic}
+
+.foot{display:flex;align-items:center;gap:16px;padding:0 14px;border-top:1px solid var(--line);background:var(--side);font-size:11px;color:var(--muted)}
+.src{display:flex;align-items:center;gap:5px}
+.src i{width:6px;height:6px;border-radius:50%;background:var(--ok)}
+.src.w i{background:var(--warn)}
+.foot .r{margin-left:auto;display:flex;gap:14px}
+
+/* chat drawer */
+.drawer{position:absolute;top:0;right:0;bottom:0;width:392px;background:var(--win);border-left:1px solid var(--line);box-shadow:-12px 0 30px rgba(20,16,40,.12);transform:translateX(102%);transition:transform .22s ease;display:flex;flex-direction:column;z-index:5}
+.drawer.open{transform:none}
+.dh{display:flex;align-items:center;gap:8px;padding:12px 14px;border-bottom:1px solid var(--line2)}
+.dh b{flex:1}
+.msgs{flex:1;padding:14px;display:flex;flex-direction:column;gap:10px;overflow:auto}
+.m{max-width:88%;padding:8px 11px;border-radius:11px;font-size:12.5px}
+.m.u{align-self:flex-end;background:var(--violet);color:var(--win)}
+.m.a{background:var(--side)}
+.m.a .chip{margin:0 1px}
+.compose{margin:12px;border:1px solid var(--line);border-radius:10px;padding:9px 11px;color:var(--faint);font-size:12.5px}
+
+/* bad week mode */
+.bad .hz, .bad .roast, .bad .rest-card, .bad .job-windows{display:none}
+.bad .bw-note{display:block}
+.bw-note{display:none;border:1px solid var(--spruce);background:var(--spruce-soft);border-radius:10px;padding:10px 12px;font-size:12.5px;margin:0 22px 14px}
+
+@media (prefers-reduced-motion: reduce){ .drawer,.sw::after,.pen.gone{transition:none} }
+</style>
+</head>
+<body>
+<div class="window" id="win">
+  <div class="titlebar"><div class="lights"><i></i><i></i><i></i></div><div class="t">Meliora</div><div style="width:52px"></div></div>
+  <div class="body">
+    <aside class="side">
+      <div class="brand">
+        <svg width="20" height="20" viewBox="0 0 20 20" aria-hidden="true"><path d="M3 17 L15 13 L5 9 L15 5 L9 2" fill="none" stroke="var(--violet)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        Meliora
+      </div>
+      <div class="nav on">Today</div>
+      <div class="nav">Week <b>3 pencil</b></div>
+      <div class="nav">Semester</div>
+      <div class="nav">Body</div>
+      <div class="nav">Peaks</div>
+      <div class="nav">Rest</div>
+      <h6>Commitments · your words</h6>
+      <div class="scm">Submit the Anduril application by Fri<span><button>Done</button><button>Move</button><button>Drop</button></span></div>
+      <div class="scm">Three lifts this week<b>1/3</b></div>
+      <div class="scm empty">Open slot (max 3)</div>
+      <h6>Vault</h6>
+      <div class="nav">Today.md</div>
+      <div class="nav">Inbox.md <b>1 new</b></div>
+      <div class="why">Your "why" card (example)<em>"Every Colorado 14er, and a body that can do anything."</em></div>
+    </aside>
+
+    <main class="main" id="main">
+      <div class="toolbar">
+        <div class="date">Tuesday, October 20 <span>Week 9 of 16 · Golden 54°F → 66°F, clear</span></div>
+        <div class="spacer"></div>
+        <div class="seg" role="group" aria-label="How hard it pushes">
+          <button id="p-q">Quiet</button><button id="p-n" class="on">Normal</button><button id="p-p">Push</button>
+        </div>
+        <button class="tbtn ghost" id="bad" aria-pressed="false">Rough week</button>
+        <button class="tbtn ghost" id="theme">Light / Dark</button>
+        <button class="tbtn primary" id="ask">Ask</button>
+      </div>
+
+      <section class="hero">
+        <div>
+          <h1 class="sentence" id="sentence">Start the Dynamics set at <mark>10:00</mark>. It's due Thursday, and today is your last open runway before the Nov 2 crunch.</h1>
+          <div class="because" id="because">because
+            <span class="chip">PS 6 · due Thu 11:59 pm</span>
+            <span class="chip">P75 est. 3h 00m</span>
+            <span class="chip">Wed has no block over 60 min</span>
+          </div>
+        </div>
+        <div class="next">
+          <div class="lbl">Next · 10:00 am, library 3rd floor</div>
+          <div class="what">Dynamics PS 6, problems 1–4 cold</div>
+          <div class="meta">2h of 3h · part 2 pencilled for tonight</div>
+          <div class="acts"><button class="tbtn primary">Start</button><button class="tbtn">Not this</button><button class="tbtn ghost">Later</button></div>
+        </div>
+      </section>
+
+      <div class="bw-note" id="bwnote"><b>Rough week mode.</b> Pushing is off and the roast is paused. Today is just three things: the Dynamics set, a 30-minute walk, and real dinner. When you switch this off, I'll offer one easy restart, not a backlog.</div>
+
+      <section class="horizon">
+        <div class="hz">
+          <h4>Next 3 weeks<small>weighted load per day</small></h4>
+          <div>
+            <div class="days" id="days"></div>
+            <div class="wkl"><span>Oct 19</span><span>Oct 26</span><span>Nov 2</span></div>
+          </div>
+          <div class="warn"><b>Crunch in 13 days.</b> Dynamics midterm Thu Nov 5, Thermo PS 7 Fri, CAD review Fri.
+            <br><button>Pencil a 10 h job cap that week</button></div>
+        </div>
+      </section>
+
+      <section class="split">
+        <div style="min-height:0">
+          <div class="panelh"><h3>Today</h3>
+            <div class="legend"><span><i class="lg-ink"></i>In your calendar</span><span><i class="lg-pen"></i>Pencil, not written yet</span><span><i class="lg-rest"></i>Protected rest</span></div>
+          </div>
+          <div class="day" id="day"></div>
+        </div>
+
+        <div class="cards">
+          <div class="card">
+            <h3>The Call <span>rules, not the model</span></h3>
+            <div class="call"><div class="verdict">EASY</div><p><b>5 mi conversational, skip the strides.</b> Lift as planned Thursday. Rest needs two red signals; you have one.</p></div>
+            <div class="inputs">
+              <div class="in"><span class="dot"></span>Sleep<b>6h 41m</b></div>
+              <div class="in"><span class="dot lo" title="Two wrist HR dropouts overnight"></span>Body batt.<b>58 low trust</b></div>
+              <div class="in"><span class="dot"></span>HRV<b>51 / 56</b></div>
+              <div class="in"><span class="dot"></span>Load 7d<b>1.18 ×</b></div>
+            </div>
+            <div class="feel">How do the legs feel?
+              <button>1</button><button>2</button><button class="on">3</button><button>4</button><button>5</button>
+            </div>
+          </div>
+
+          <div class="card">
+            <h3>Job hours <span>this week</span></h3>
+            <div class="bar"><i id="jobdone" style="width:50%;background:var(--violet)"></i><i id="jobpen" style="width:14.3%;background:var(--gold);opacity:.6"></i></div>
+            <div class="jobrow"><span><b class="num" id="jobnum">7</b> of 14 h done</span><span class="num" style="color:var(--gold)" id="jobpenlbl">+2 h pencilled</span></div>
+            <div class="windows job-windows">Best open windows: <b>today 3:15–5:15</b>, Thu 1:00–4:00, Sat 9:00–12:00. Wed only has short gaps, so I left it alone.</div>
+          </div>
+
+          <div class="card rest-card">
+            <h3>Rest &amp; screens <span>Mon–Tue</span></h3>
+            <div class="rest2">
+              <div class="c">Chosen rest<b>3h 25m</b>Minecraft 2h 15m · Netflix 1h 10m</div>
+              <div class="dr">Drift<b>1h 55m</b>YouTube, all after 11 pm</div>
+            </div>
+            <p class="roast" id="roast">1h 55m of YouTube after 11 pm: today's whole job window, spent watching other people's builds. Your own Minecraft base? Fully approved.</p>
+            <div class="optin"><button class="sw" id="sw" aria-pressed="true" aria-label="Roast on"></button><span id="swl">Roast on (opted in) · weekly, plus one evening line max</span></div>
+          </div>
+        </div>
+      </section>
+
+      <aside class="drawer" id="drawer" aria-label="Ask">
+        <div class="dh"><b>Ask</b>
+          <div class="seg"><button class="on" id="m-l">Local · Qwen3</button><button id="m-c">Claude</button></div>
+          <button class="tbtn ghost" id="close">Close</button>
+        </div>
+        <div class="msgs">
+          <div class="m u">Can I move the run to after the lab and still do PS part 2 tonight?</div>
+          <div class="m a">Yes. Run 3:00–3:40 instead, and the job block shifts to 3:45–5:45. That still leaves PS part 2 at 7:30 and your rest window at 8:45. It's 41°F by 6, so 3:00 is also the warmer run. <br><br><span class="chip">pencil 2 changes</span></div>
+          <div class="m u">Do it</div>
+          <div class="m a">Pencilled. They'll stay dashed on Today until you confirm.</div>
+        </div>
+        <div class="compose">Ask about your day, or say "move…"</div>
+      </aside>
+    </main>
+  </div>
+  <div class="foot">
+    <span class="src"><i></i>Calendar 6:31</span>
+    <span class="src"><i></i>Canvas 6:31</span>
+    <span class="src w"><i></i>Garmin 6:32 · HR dropouts</span>
+    <span class="src"><i></i>Weather 6:30</span>
+    <span class="src"><i></i>Screen Time 6:31</span>
+    <span class="src"><i></i>Mail 6:33 · 2 need reply</span>
+    <span class="src"><i></i>Vault synced</span>
+    <span class="r"><span>Notifications today 1 of 3</span><span>Model: local, offline-ready</span><span class="num">Claude today 4.2k tok</span></span>
+  </div>
+</div>
+
+<script>
+(function(){
+  // 3-week horizon: Mon Oct 19 .. Sun Nov 8. load 0-5
+  var load=[2,2,3,2,3,1,1, 2,3,3,2,2,1,1, 4,4,3,5,5,1,1];
+  var days=document.getElementById('days');
+  load.forEach(function(v,i){
+    var d=document.createElement('div'); d.className='d';
+    if(i%7>=5) d.className+=' wk';
+    else if(v>=4) d.className+=' crunch';
+    else if(v===3) d.className+=' l3';
+    else if(v===2) d.className+=' l2';
+    if(i===1) d.className+=' today';
+    d.style.height=(10+v*7)+'px'; days.appendChild(d);
+  });
+
+  // day timeline 7:00..23:00 within 452px
+  var day=document.getElementById('day'), start=7, end=23.4, H=418, px=H/(end-start);
+  function y(t){return (t-start)*px;}
+  for(var h=start;h<end;h+=2){var r=document.createElement('div');r.className='hr';r.style.top=y(h)+'px';
+    var lab=(h>12?h-12:h)+(h>=12?'p':'a');r.innerHTML='<span>'+lab+'</span>';day.appendChild(r);}
+  var B=[
+    [7.25,7.75,'prot','Breakfast','protected'],
+    [8,8.83,'ink','Dynamics','Brown W210'],
+    [9,9.83,'ink','Thermo','Marquez 126 · 12 min walk after'],
+    [10,12,'pen','Dynamics PS 6, part 1','start-by today · 2h of 3h','ps1'],
+    [12,12.67,'prot','Lunch','protected'],
+    [13,14.83,'ink','Machine Design lab','CTLM 102'],
+    [15.25,17.25,'pen','Job · best window this week','brings you to 9 of 14 h','job'],
+    [17.5,18.17,'ink','Easy run 5 mi','Clear Creek trail · The Call: EASY'],
+    [18.5,19.17,'prot','Dinner','protected'],
+    [19.5,20.5,'pen','Dynamics PS 6, part 2','1h, finishes the estimate','ps2'],
+    [20.75,22.5,'rest','Rest window: Minecraft or Netflix','protected · I won\'t schedule over it']
+  ];
+  B.forEach(function(b){
+    var el=document.createElement('div'); el.className='blk '+b[2];
+    el.style.top=(y(b[0])+1)+'px'; el.style.height=(y(b[1])-y(b[0])-2)+'px';
+    var t=function(x){var hh=Math.floor(x),mm=Math.round((x-hh)*60);var s=(hh>12?hh-12:hh)+':'+(mm<10?'0':'')+mm;return s;};
+    var inner='';
+    if(b[2]==='pen') inner+='<span class="tag">Pencil</span>';
+    inner+='<span class="tm">'+t(b[0])+'</span><b style="font-weight:600">'+b[3]+'</b><span class="sub">'+b[4]+'</span>';
+    if(b[2]==='pen') inner+='<span class="pa"><button class="y">Confirm</button><button>Decline</button></span>';
+    el.innerHTML=inner; if(b[5]) el.dataset.id=b[5];
+    day.appendChild(el);
+  });
+  var now=document.createElement('div'); now.className='now'; now.style.top=y(9.92)+'px'; day.appendChild(now);
+  var endl=document.createElement('div'); endl.className='endline'; endl.style.top=(y(22.5)+2)+'px'; endl.textContent='After 10:30, nothing else needs you.'; day.appendChild(endl);
+
+  // confirm / decline
+  var jobDone=7, jobPen=2;
+  function renderJob(){
+    document.getElementById('jobnum').textContent=jobDone;
+    document.getElementById('jobdone').style.width=(jobDone/14*100)+'%';
+    document.getElementById('jobpen').style.width=(jobPen/14*100)+'%';
+    document.getElementById('jobpenlbl').textContent= jobPen? '+'+jobPen+' h pencilled' : (jobDone>=9?'+2 h booked':'');
+  }
+  day.addEventListener('click',function(e){
+    var btn=e.target.closest('button'); if(!btn) return;
+    var blk=btn.closest('.pen'); if(!blk) return;
+    if(btn.classList.contains('y')){ blk.classList.add('done');
+      if(blk.dataset.id==='job'){ jobPen=0; jobDone=7; document.getElementById('jobpenlbl').textContent='+2 h booked'; document.getElementById('jobpen').style.width='14.3%'; document.getElementById('jobpen').style.opacity='1'; document.getElementById('jobpen').style.background='var(--violet)'; return; }
+    } else { blk.classList.add('gone'); if(blk.dataset.id==='job'){ jobPen=0; renderJob(); } }
+  });
+
+  // push level
+  ['p-q','p-n','p-p'].forEach(function(id){document.getElementById(id).onclick=function(){
+    ['p-q','p-n','p-p'].forEach(function(o){document.getElementById(o).classList.toggle('on',o===id)});}});
+  // model toggle
+  ['m-l','m-c'].forEach(function(id){document.getElementById(id).onclick=function(){
+    ['m-l','m-c'].forEach(function(o){document.getElementById(o).classList.toggle('on',o===id)});}});
+
+  // roast opt-in
+  var sw=document.getElementById('sw');
+  sw.onclick=function(){var on=sw.getAttribute('aria-pressed')!=='true';sw.setAttribute('aria-pressed',on);
+    document.getElementById('roast').hidden=!on;
+    document.getElementById('swl').textContent= on?'Roast on (opted in) · weekly, plus one evening line max':'Roast off · numbers only';};
+
+  // bad week
+  var bad=document.getElementById('bad'), main=document.getElementById('main'), s=document.getElementById('sentence'), orig=s.innerHTML, origB=document.getElementById('because').innerHTML;
+  bad.onclick=function(){var on=bad.getAttribute('aria-pressed')!=='true';bad.setAttribute('aria-pressed',on);main.classList.toggle('bad',on);
+    s.innerHTML= on? 'One thing today: <mark>the Dynamics set</mark>. Everything else can wait until you feel like it.' : orig;
+    document.getElementById('because').innerHTML = on? 'because <span class="chip">due Thu</span><span class="chip">you asked for quiet</span>' : origB;};
+
+  // drawer
+  var dr=document.getElementById('drawer');
+  document.getElementById('ask').onclick=function(){dr.classList.toggle('open')};
+  document.getElementById('close').onclick=function(){dr.classList.remove('open')};
+
+  // theme
+  document.getElementById('theme').onclick=function(){var r=document.documentElement;
+    var cur=r.getAttribute('data-theme') || (matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light');
+    r.setAttribute('data-theme',cur==='dark'?'light':'dark');};
+})();
+</script>
+</body>
+</html>

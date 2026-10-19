@@ -1,0 +1,142 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Meliora</title>
+<link rel="stylesheet" href="style.css">
+<style>
+/* App-only additions on top of the mockup styles. */
+.main{grid-template-rows:auto auto auto minmax(0,1fr)}
+.split>.left{display:flex;flex-direction:column;min-height:0;padding-bottom:14px}
+.sentence,.because,.next{transition:opacity .18s}
+.fading{opacity:0}
+.demo{font-size:9.5px;letter-spacing:.6px;text-transform:uppercase;color:var(--faint);border:1px dashed var(--line);border-radius:4px;padding:0 4px;margin-left:6px;font-weight:600}
+.toast{position:absolute;left:50%;bottom:44px;transform:translate(-50%,20px);opacity:0;background:var(--fg);color:var(--win);padding:8px 14px;border-radius:9px;font-size:12px;transition:all .2s;pointer-events:none;z-index:9}
+.toast.show{opacity:1;transform:translate(-50%,0)}
+.compose{display:flex;padding:0;color:var(--fg)}
+.compose input{flex:1;border:0;background:none;font:inherit;color:inherit;padding:9px 11px;outline:none}
+.msgs .m.a.pending{color:var(--faint)}
+.pen.declined{opacity:.35;background:none;border-style:dotted}
+.pen.declined .tag{color:var(--faint)}
+.pen.declined .pa button:not(.undo){display:none}
+.pa .undo{display:none}.pen.declined .pa .undo{display:inline-block}
+.err{padding:40px;font-family:var(--mono);color:var(--ember)}
+</style>
+</head>
+<body>
+<div class="window" id="win">
+  <div class="body">
+    <aside class="side">
+      <div class="brand">
+        <svg width="20" height="20" viewBox="0 0 20 20" aria-hidden="true"><path d="M3 17 L15 13 L5 9 L15 5 L9 2" fill="none" stroke="var(--violet)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        Meliora
+      </div>
+      <div class="nav on">Today <b id="pendcount"></b></div>
+      <div class="nav">Week</div>
+      <div class="nav">Semester</div>
+      <div class="nav">Body</div>
+      <div class="nav">Peaks</div>
+      <div class="nav">Rest</div>
+      <h6>Commitments · your words <span class="demo">demo</span></h6>
+      <div class="scm">Submit the Anduril application by Fri</div>
+      <div class="scm">Three lifts this week<b>1/3</b></div>
+      <div class="scm empty">Open slot (max 3)</div>
+      <div class="why">Your "why" card (example)<em>"Every Colorado 14er, and a body that can do anything."</em></div>
+    </aside>
+
+    <main class="main" id="main">
+      <div class="toolbar">
+        <div class="date"><span id="date" style="margin:0;color:var(--fg);font-weight:600"></span> <span>Golden · weather not connected yet</span></div>
+        <div class="spacer"></div>
+        <div class="seg" role="group" aria-label="How hard it pushes">
+          <button data-push="quiet">Quiet</button><button data-push="normal" class="on">Normal</button><button data-push="push">Push</button>
+        </div>
+        <button class="tbtn ghost" id="reset" title="Clear today's Confirm/Decline choices">Reset demo</button>
+        <button class="tbtn ghost" id="theme">Light / Dark</button>
+        <button class="tbtn primary" id="ask">Ask</button>
+      </div>
+
+      <section class="hero">
+        <div>
+          <h1 class="sentence" id="sentence">Loading…</h1>
+          <div class="because" id="because"></div>
+        </div>
+        <div class="next" id="next"></div>
+      </section>
+
+      <section class="horizon">
+        <div class="hz">
+          <h4>Next 3 weeks <span class="demo">demo</span><small>weighted load per day</small></h4>
+          <div>
+            <div class="days" id="days"></div>
+            <div class="wkl" id="wkl"></div>
+          </div>
+          <div class="warn"><b>Crunch in 13 days.</b> Dynamics midterm, Thermo PS 7, CAD review the same week.</div>
+        </div>
+      </section>
+
+      <section class="split">
+        <div class="left">
+          <div class="panelh"><h3>Today <span class="demo">demo day</span></h3>
+            <div class="legend"><span><i class="lg-ink"></i>In your calendar</span><span><i class="lg-pen"></i>Pencil, not written yet</span><span><i class="lg-rest"></i>Protected rest</span></div>
+          </div>
+          <div class="day" id="day"></div>
+        </div>
+
+        <div class="cards">
+          <div class="card">
+            <h3>The Call <span>rules, not the model · <span class="demo">demo</span></span></h3>
+            <div class="call"><div class="verdict">EASY</div><p><b>5 mi conversational, skip the strides.</b> Rest needs two red signals; you have one.</p></div>
+            <div class="inputs">
+              <div class="in"><span class="dot"></span>Sleep<b>6h 41m</b></div>
+              <div class="in"><span class="dot lo"></span>Body batt.<b>58 low trust</b></div>
+              <div class="in"><span class="dot"></span>HRV<b>51 / 56</b></div>
+              <div class="in"><span class="dot"></span>Load 7d<b>1.18 ×</b></div>
+            </div>
+            <div class="feel" id="feel">How do the legs feel?
+              <button>1</button><button>2</button><button class="on">3</button><button>4</button><button>5</button>
+            </div>
+          </div>
+
+          <div class="card">
+            <h3>Job hours <span>this week</span></h3>
+            <div class="bar"><i id="jobdone" style="background:var(--violet)"></i><i id="jobpen"></i></div>
+            <div class="jobrow"><span><b class="num" id="jobnum"></b> of <span id="jobtgt"></span> h done</span><span class="num" id="jobpenlbl"></span></div>
+          </div>
+
+          <div class="card rest-card">
+            <h3>Rest &amp; screens <span class="demo">demo</span></h3>
+            <div class="rest2">
+              <div class="c">Chosen rest<b>3h 25m</b>Minecraft 2h 15m · Netflix 1h 10m</div>
+              <div class="dr">Drift<b>1h 55m</b>YouTube, after 11 pm</div>
+            </div>
+            <div class="optin"><button class="sw" id="sw" aria-pressed="false" aria-label="Roast off"></button><span id="swl">Roast off until you opt in</span></div>
+            <p class="roast" id="roast" hidden>1h 55m of YouTube after 11 pm: today's whole job window. Your own Minecraft base? Fully approved.</p>
+          </div>
+        </div>
+      </section>
+
+      <aside class="drawer" id="drawer" aria-label="Ask">
+        <div class="dh"><b>Ask</b>
+          <div class="seg"><button class="on">Local · Qwen3</button><button>Claude</button></div>
+          <button class="tbtn ghost" id="close">Close</button>
+        </div>
+        <div class="msgs" id="msgs">
+          <div class="m a">Ask about your day. (The model isn't connected yet, but this round-trips through Python.)</div>
+        </div>
+        <form class="compose" id="compose"><input id="q" placeholder="Ask about your day, or say “move…”" autocomplete="off"></form>
+      </aside>
+      <div class="toast" id="toast"></div>
+    </main>
+  </div>
+  <div class="foot">
+    <span class="src w"><i></i>Calendar · not connected</span>
+    <span class="src w"><i></i>Canvas · not connected</span>
+    <span class="src w"><i></i>Weather · not connected</span>
+    <span class="src" id="bridge"><i></i>Python bridge</span>
+    <span class="r"><span>Choices saved to data/meliora.sqlite</span><span>Notifications today 0 of 3</span><span>Model: none yet</span></span>
+  </div>
+</div>
+<script src="app.js"></script>
+</body>
+</html>
