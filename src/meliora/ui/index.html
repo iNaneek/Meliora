@@ -1,142 +1,105 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" data-ink="dark">
 <head>
 <meta charset="utf-8">
 <title>Meliora</title>
 <link rel="stylesheet" href="style.css">
-<style>
-/* App-only additions on top of the mockup styles. */
-.main{grid-template-rows:auto auto auto minmax(0,1fr)}
-.split>.left{display:flex;flex-direction:column;min-height:0;padding-bottom:14px}
-.sentence,.because,.next{transition:opacity .18s}
-.fading{opacity:0}
-.demo{font-size:9.5px;letter-spacing:.6px;text-transform:uppercase;color:var(--faint);border:1px dashed var(--line);border-radius:4px;padding:0 4px;margin-left:6px;font-weight:600}
-.toast{position:absolute;left:50%;bottom:44px;transform:translate(-50%,20px);opacity:0;background:var(--fg);color:var(--win);padding:8px 14px;border-radius:9px;font-size:12px;transition:all .2s;pointer-events:none;z-index:9}
-.toast.show{opacity:1;transform:translate(-50%,0)}
-.compose{display:flex;padding:0;color:var(--fg)}
-.compose input{flex:1;border:0;background:none;font:inherit;color:inherit;padding:9px 11px;outline:none}
-.msgs .m.a.pending{color:var(--faint)}
-.pen.declined{opacity:.35;background:none;border-style:dotted}
-.pen.declined .tag{color:var(--faint)}
-.pen.declined .pa button:not(.undo){display:none}
-.pa .undo{display:none}.pen.declined .pa .undo{display:inline-block}
-.err{padding:40px;font-family:var(--mono);color:var(--ember)}
-</style>
 </head>
 <body>
-<div class="window" id="win">
-  <div class="body">
-    <aside class="side">
-      <div class="brand">
-        <svg width="20" height="20" viewBox="0 0 20 20" aria-hidden="true"><path d="M3 17 L15 13 L5 9 L15 5 L9 2" fill="none" stroke="var(--violet)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-        Meliora
-      </div>
-      <div class="nav on">Today <b id="pendcount"></b></div>
-      <div class="nav">Week</div>
-      <div class="nav">Semester</div>
-      <div class="nav">Body</div>
-      <div class="nav">Peaks</div>
-      <div class="nav">Rest</div>
-      <h6>Commitments · your words <span class="demo">demo</span></h6>
-      <div class="scm">Submit the Anduril application by Fri</div>
-      <div class="scm">Three lifts this week<b>1/3</b></div>
-      <div class="scm empty">Open slot (max 3)</div>
-      <div class="why">Your "why" card (example)<em>"Every Colorado 14er, and a body that can do anything."</em></div>
-    </aside>
 
-    <main class="main" id="main">
-      <div class="toolbar">
-        <div class="date"><span id="date" style="margin:0;color:var(--fg);font-weight:600"></span> <span>Golden · weather not connected yet</span></div>
-        <div class="spacer"></div>
-        <div class="seg" role="group" aria-label="How hard it pushes">
-          <button data-push="quiet">Quiet</button><button data-push="normal" class="on">Normal</button><button data-push="push">Push</button>
-        </div>
-        <button class="tbtn ghost" id="reset" title="Clear today's Confirm/Decline choices">Reset demo</button>
-        <button class="tbtn ghost" id="theme">Light / Dark</button>
-        <button class="tbtn primary" id="ask">Ask</button>
-      </div>
-
-      <section class="hero">
-        <div>
-          <h1 class="sentence" id="sentence">Loading…</h1>
-          <div class="because" id="because"></div>
-        </div>
-        <div class="next" id="next"></div>
-      </section>
-
-      <section class="horizon">
-        <div class="hz">
-          <h4>Next 3 weeks <span class="demo">demo</span><small>weighted load per day</small></h4>
-          <div>
-            <div class="days" id="days"></div>
-            <div class="wkl" id="wkl"></div>
-          </div>
-          <div class="warn"><b>Crunch in 13 days.</b> Dynamics midterm, Thermo PS 7, CAD review the same week.</div>
-        </div>
-      </section>
-
-      <section class="split">
-        <div class="left">
-          <div class="panelh"><h3>Today <span class="demo">demo day</span></h3>
-            <div class="legend"><span><i class="lg-ink"></i>In your calendar</span><span><i class="lg-pen"></i>Pencil, not written yet</span><span><i class="lg-rest"></i>Protected rest</span></div>
-          </div>
-          <div class="day" id="day"></div>
-        </div>
-
-        <div class="cards">
-          <div class="card">
-            <h3>The Call <span>rules, not the model · <span class="demo">demo</span></span></h3>
-            <div class="call"><div class="verdict">EASY</div><p><b>5 mi conversational, skip the strides.</b> Rest needs two red signals; you have one.</p></div>
-            <div class="inputs">
-              <div class="in"><span class="dot"></span>Sleep<b>6h 41m</b></div>
-              <div class="in"><span class="dot lo"></span>Body batt.<b>58 low trust</b></div>
-              <div class="in"><span class="dot"></span>HRV<b>51 / 56</b></div>
-              <div class="in"><span class="dot"></span>Load 7d<b>1.18 ×</b></div>
-            </div>
-            <div class="feel" id="feel">How do the legs feel?
-              <button>1</button><button>2</button><button class="on">3</button><button>4</button><button>5</button>
-            </div>
-          </div>
-
-          <div class="card">
-            <h3>Job hours <span>this week</span></h3>
-            <div class="bar"><i id="jobdone" style="background:var(--violet)"></i><i id="jobpen"></i></div>
-            <div class="jobrow"><span><b class="num" id="jobnum"></b> of <span id="jobtgt"></span> h done</span><span class="num" id="jobpenlbl"></span></div>
-          </div>
-
-          <div class="card rest-card">
-            <h3>Rest &amp; screens <span class="demo">demo</span></h3>
-            <div class="rest2">
-              <div class="c">Chosen rest<b>3h 25m</b>Minecraft 2h 15m · Netflix 1h 10m</div>
-              <div class="dr">Drift<b>1h 55m</b>YouTube, after 11 pm</div>
-            </div>
-            <div class="optin"><button class="sw" id="sw" aria-pressed="false" aria-label="Roast off"></button><span id="swl">Roast off until you opt in</span></div>
-            <p class="roast" id="roast" hidden>1h 55m of YouTube after 11 pm: today's whole job window. Your own Minecraft base? Fully approved.</p>
-          </div>
-        </div>
-      </section>
-
-      <aside class="drawer" id="drawer" aria-label="Ask">
-        <div class="dh"><b>Ask</b>
-          <div class="seg"><button class="on">Local · Qwen3</button><button>Claude</button></div>
-          <button class="tbtn ghost" id="close">Close</button>
-        </div>
-        <div class="msgs" id="msgs">
-          <div class="m a">Ask about your day. (The model isn't connected yet, but this round-trips through Python.)</div>
-        </div>
-        <form class="compose" id="compose"><input id="q" placeholder="Ask about your day, or say “move…”" autocomplete="off"></form>
-      </aside>
-      <div class="toast" id="toast"></div>
-    </main>
-  </div>
-  <div class="foot">
-    <span class="src w"><i></i>Calendar · not connected</span>
-    <span class="src w"><i></i>Canvas · not connected</span>
-    <span class="src w"><i></i>Weather · not connected</span>
-    <span class="src" id="bridge"><i></i>Python bridge</span>
-    <span class="r"><span>Choices saved to data/meliora.sqlite</span><span>Notifications today 0 of 3</span><span>Model: none yet</span></span>
-  </div>
+<!-- The sky: everything behind the glass. -->
+<div class="sky" id="sky" aria-hidden="true">
+  <svg class="stars" id="stars"></svg>
+  <svg class="aurora" id="aurora" viewBox="0 0 1440 600" preserveAspectRatio="none">
+    <defs><filter id="soft" x="-20%" y="-50%" width="140%" height="200%"><feGaussianBlur stdDeviation="22"/></filter></defs>
+    <g filter="url(#soft)" fill="none" stroke-linecap="round">
+      <path class="rib r1" d="M-60 230 C 200 120, 420 300, 700 190 S 1180 90, 1500 210" stroke="#3BE38B" stroke-width="70"/>
+      <path class="rib r2" d="M-60 300 C 260 220, 520 360, 820 250 S 1240 180, 1500 280" stroke="#8A5CF6" stroke-width="60"/>
+      <path class="rib r3" d="M-60 160 C 300 90, 600 220, 900 130 S 1300 60, 1500 140" stroke="#E05AA8" stroke-width="40"/>
+    </g>
+  </svg>
+  <div class="sun" id="sun"></div>
+  <div class="belt" id="belt"></div>
+  <div class="glow" id="glow"></div>
+  <svg class="ridge" viewBox="0 0 1440 300" preserveAspectRatio="xMidYMax slice">
+    <defs>
+      <linearGradient id="litGrad" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="#F2B39B" stop-opacity="1"/>
+        <stop offset=".45" stop-color="#F2B39B" stop-opacity=".35"/>
+        <stop offset=".8" stop-color="#F2B39B" stop-opacity="0"/>
+      </linearGradient>
+    </defs>
+    <path id="ridge-far" d="M0 300 L0 170 L80 150 L150 120 L210 140 L290 95 L350 118 L420 80 L470 102 L540 70 L600 96 L680 110 L740 78 L800 60 L850 88 L930 72 L1000 100 L1080 84 L1150 110 L1220 90 L1300 120 L1380 104 L1440 130 L1440 300 Z"/>
+    <path id="ridge-near" d="M0 300 L0 230 L90 205 L170 215 L250 170 L310 188 L380 140 L430 160 L500 120 L560 150 L620 165 L700 132 L760 150 L840 110 L900 70 L960 112 L1020 128 L1090 160 L1160 145 L1240 178 L1320 165 L1440 200 L1440 300 Z"/>
+    <path id="ridge-lit" fill="url(#litGrad)" d="M0 300 L0 230 L90 205 L170 215 L250 170 L310 188 L380 140 L430 160 L500 120 L560 150 L620 165 L700 132 L760 150 L840 110 L900 70 L960 112 L1020 128 L1090 160 L1160 145 L1240 178 L1320 165 L1440 200 L1440 300 Z"/>
+  </svg>
 </div>
+
+<div class="app">
+  <aside class="side glass">
+    <div class="brand">
+      <svg width="20" height="20" viewBox="0 0 20 20" aria-hidden="true"><path d="M3 17 L15 13 L5 9 L15 5 L9 2" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      Meliora
+    </div>
+    <nav>
+      <a class="nav on">Today <b id="pendcount"></b></a>
+      <a class="nav">Week</a>
+      <a class="nav">Semester</a>
+      <a class="nav">Body</a>
+      <a class="nav">Peaks</a>
+      <a class="nav">Rest</a>
+    </nav>
+    <div class="why">Your "why" (example)<em>"Every Colorado 14er, and a body that can do anything."</em></div>
+    <div class="sources">
+      <div class="src off"><i></i>Calendar · not connected</div>
+      <div class="src off"><i></i>Canvas · not connected</div>
+      <div class="src off"><i></i>Weather · not connected</div>
+      <div class="src" id="bridge"><i></i>Python bridge</div>
+    </div>
+  </aside>
+
+  <header class="top glass">
+    <div class="date"><b id="date"></b><span id="suntimes"></span></div>
+    <div class="spacer"></div>
+    <div class="seg" role="group" aria-label="How hard it pushes">
+      <button data-push="quiet">Quiet</button><button data-push="normal" class="on">Normal</button><button data-push="push">Push</button>
+    </div>
+    <button class="btn ghost" id="reset" title="Clear today's Confirm/Decline choices">Reset demo</button>
+    <button class="btn primary" id="ask">Ask</button>
+  </header>
+
+  <main class="center">
+    <section class="hero">
+      <div class="eyebrow" id="phase"></div>
+      <h1 class="sentence" id="sentence">Loading…</h1>
+      <div class="because" id="because"></div>
+      <div class="next glass" id="next"></div>
+    </section>
+
+    <section class="agenda glass">
+      <div class="agenda-h"><h3>Today</h3><span class="tag-demo">demo day</span></div>
+      <div class="rows" id="rows"></div>
+    </section>
+
+    <aside class="drawer glass" id="drawer" aria-label="Ask">
+      <div class="dh"><b>Ask</b><button class="btn ghost" id="close">Close</button></div>
+      <div class="msgs" id="msgs">
+        <div class="m a">Ask about your day. The model isn't connected yet, but this goes through Python.</div>
+      </div>
+      <form class="compose" id="compose"><input id="q" placeholder="Ask about your day…" autocomplete="off"></form>
+    </aside>
+  </main>
+
+  <footer class="scrub glass">
+    <span class="scrub-l">Sky</span>
+    <input type="range" id="slider" min="0" max="1439" step="1" aria-label="Time of day for the sky">
+    <span class="readout" id="readout"></span>
+    <button class="btn ghost" id="live" aria-pressed="true">Live</button>
+  </footer>
+  <div class="toast" id="toast"></div>
+</div>
+
+<script src="sky.js"></script>
 <script src="app.js"></script>
 </body>
 </html>

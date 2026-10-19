@@ -18,6 +18,12 @@ The design rationale lives in `docs/SYNTHESIS.md`, which records what was kept a
 - **Secrets** (Canvas token, Garmin tokens, app passwords) go in macOS Keychain via `keyring`. They never go in git or the vault.
 - **Data:** `data/` holds the SQLite database and logs. It is gitignored and must never be inside iCloud.
 
+## Who does what
+- **Python with no model:** all scheduling and placement (a scoring heuristic first, OR-Tools CP-SAT if it gets hairy), The Call, crunch detection, job windows, notification budget. This must work offline.
+- **Local model (Qwen3 via Ollama), structured JSON only:** turning natural-language requests ("fit 2 h of job work Thursday") into a structured intent the scheduler executes, classifying emails and reminders, extracting dates (always shown for confirmation), phrasing The Sentence and Today.md, quick chat about today's data. Use the largest model that runs comfortably on the M4 Max with 64 GB (e.g. Qwen3-30B-A3B or 32B at 4-bit), with a smaller fast model for instant UI phrasing.
+- **Claude (`claude -p`, online only):** workout programming and training advice, the Sunday weekly plan, judgment-heavy tradeoffs, and writing that matters (applications, important emails). Send structured summaries, not raw dumps, and log tokens. Results are written to the vault (e.g. `Assistant/Training.md`) so they reach the phone and any Claude chat can read them. When offline, fall back to the local model and mark the output as provisional.
+- **Billing:** `claude -p` runs on Keenan's Claude subscription, not paid API credits. Never call the Anthropic API directly. Make sure `ANTHROPIC_API_KEY` is **unset** in the shell and the launchd environment; if it's set, Claude Code switches to pay-per-use API billing. Usage counts against the same limits as his Claude chats, so keep calls few and prompts compact.
+
 ## Core design rules (non-negotiable)
 1. **Rules decide, the model phrases.** Scheduling, readiness, and alerts are plain Python. The LLM only turns structured results into words. Offline Qwen3 must produce a usable day.
 2. **Pencil before ink.** The app never writes to Keenan's calendar without a Confirm. Proposed blocks are drawn dashed. Confirmed blocks go to a dedicated calendar named "Meliora", so a bad plan can be deleted in one step.
