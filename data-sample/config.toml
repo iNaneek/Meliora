@@ -6,6 +6,10 @@
 # Obsidian vault. ~ is expanded. The app writes only inside <vault>/Assistant/.
 path = "~/Documents/Vault"
 
+[garmin]
+# History to fill with `uv run meliora-garmin backfill` (one time, resumable).
+backfill_since = "2026-09-01"
+
 [weather]
 # Open-Meteo models pulled for every place (free, no key). NWS covers the US only.
 models = ["ecmwf_ifs025", "ncep_nam_conus"]

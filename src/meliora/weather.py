@@ -53,19 +53,6 @@ def _get(url: str, params: dict | None = None, headers: dict | None = None, trie
             raise
 
 
-def _now() -> str:
-    return datetime.now().isoformat(timespec="seconds")
-
-
-def _mark(conn: sqlite3.Connection, source: str, ok: bool, detail: str = "") -> None:
-    conn.execute(
-        """INSERT INTO source_sync (source, last_ok, last_try, detail) VALUES (?, ?, ?, ?)
-           ON CONFLICT(source) DO UPDATE SET
-             last_ok = COALESCE(excluded.last_ok, last_ok), last_try = excluded.last_try, detail = excluded.detail""",
-        (source, _now() if ok else None, _now(), detail),
-    )
-
-
 def save_places(conn: sqlite3.Connection, places: list[dict]) -> None:
     conn.execute("DELETE FROM places")
     conn.executemany(
@@ -106,13 +93,13 @@ def fetch_open_meteo(conn: sqlite3.Connection, places: list[dict], models: list[
         try:
             rows = fetch_model(places, model, days)
         except Exception as e:  # keep the old rows for this model; say so in source_sync
-            _mark(conn, f"open-meteo:{model}", False, str(e)[:200])
+            db.mark_sync(conn, f"open-meteo:{model}", False, str(e)[:200])
             report[model] = f"failed ({e})"
             continue
         with conn:
             conn.execute("DELETE FROM weather_hourly WHERE model = ?", (model,))
             conn.executemany(f"INSERT INTO weather_hourly (place_id, model, time, {cols}) VALUES ({marks})", rows)
-            _mark(conn, f"open-meteo:{model}", True, f"{len(rows)} rows")
+            db.mark_sync(conn, f"open-meteo:{model}", True, f"{len(rows)} rows")
         report[model] = f"{len(rows)} rows"
     return report
 
@@ -130,10 +117,10 @@ def fetch_nws(conn: sqlite3.Connection, home: dict, user_agent: str) -> dict:
                   a["properties"]["headline"], a["properties"]["areaDesc"], a["properties"]["onset"],
                   a["properties"].get("ends") or a["properties"].get("expires")) for a in alerts],
             )
-            _mark(conn, "nws:alerts", True, f"{len(alerts)} active")
+            db.mark_sync(conn, "nws:alerts", True, f"{len(alerts)} active")
         report["alerts"] = f"{len(alerts)} active in CO"
     except Exception as e:
-        _mark(conn, "nws:alerts", False, str(e)[:200])
+        db.mark_sync(conn, "nws:alerts", False, str(e)[:200])
         report["alerts"] = f"failed ({e})"
     try:
         point = _get(f"{NWS}/points/{home['lat']},{home['lon']}", headers=headers)
@@ -145,10 +132,10 @@ def fetch_nws(conn: sqlite3.Connection, home: dict, user_agent: str) -> dict:
                 [(home["id"], p["number"], p["name"], p["startTime"], p["endTime"], p["temperature"],
                   p["temperatureUnit"], p["windSpeed"], p["shortForecast"], p["detailedForecast"]) for p in periods],
             )
-            _mark(conn, "nws:forecast", True, f"{len(periods)} periods")
+            db.mark_sync(conn, "nws:forecast", True, f"{len(periods)} periods")
         report["forecast"] = f"{len(periods)} periods for {home['name']}"
     except Exception as e:
-        _mark(conn, "nws:forecast", False, str(e)[:200])
+        db.mark_sync(conn, "nws:forecast", False, str(e)[:200])
         report["forecast"] = f"failed ({e})"
     return report
 

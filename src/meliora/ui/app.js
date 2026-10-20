@@ -84,6 +84,11 @@
       if (what === 'decline') toast('Declined. The plan re-ran without it.');
     });
   });
+  $('sync').onclick = function () {
+    if (!api) return;
+    var b = this; b.disabled = true; $('src-garmin').innerHTML = '<i></i>Garmin · syncing…';
+    api.garmin_sync().then(function (r) { b.disabled = false; toast(r.msg); renderSources(); });
+  };
   $('reset').onclick = function () { api && api.reset().then(function (s) { render(s, true); toast('Demo reset.'); }); };
   document.querySelectorAll('[data-push]').forEach(function (b) {
     b.onclick = function () { document.querySelectorAll('[data-push]').forEach(function (o) { o.classList.toggle('on', o === b); }); };
@@ -110,6 +115,16 @@
       var fresh = t && (Date.now() - t) < 6 * 3600e3;
       el.className = 'src' + (fresh ? '' : ' off');
       el.innerHTML = '<i></i>Weather · ' + label;
+      var g = src.garmin, gt = g.last_ok && new Date(g.last_ok), glabel;
+      if (!g.connected) glabel = 'not connected';
+      else if (g.busy) glabel = 'syncing…';
+      else if (!gt) glabel = 'not synced yet';
+      else glabel = (gt.toDateString() === new Date().toDateString() ? '' :
+        gt.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) + ' ') + clock(gt) +
+        (g.detail === 'waiting on sleep' ? ' · no sleep yet' : '');
+      var gfresh = gt && gt.toDateString() === new Date().toDateString() && g.detail !== 'waiting on sleep';
+      $('src-garmin').parentNode.className = 'src' + (gfresh ? '' : ' off');
+      $('src-garmin').innerHTML = '<i></i>Garmin · ' + glabel;
       var w = src.today;
       $('wx').textContent = [homeName, w && w.high_f + '° / ' + w.low_f + '°', w && w.sky, w && w.precip].filter(Boolean).join(' · ');
     });

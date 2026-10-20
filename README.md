@@ -29,6 +29,20 @@ uv run meliora-weather         # fetch weather now and print a snow summary
 The `.app` is a thin launcher that runs the code in this repo, so edits to
 `src/meliora/` show up the next time you open it. Logs go to `data/app.log`.
 
+## Garmin
+
+```sh
+uv run meliora-garmin login      # once: email, password, MFA. Only session tokens are kept (Keychain)
+uv run meliora-garmin backfill   # once: history since [garmin] backfill_since (resumable)
+uv run meliora-garmin sample     # or: load fake data from data-sample/garmin.json
+```
+
+Pulls sleep, HRV, resting HR, Body Battery, training readiness, VO2 max and all
+activities. The app pulls on the first launch or wake of the day, retries 30 and 60
+minutes later only if last night's sleep hasn't synced yet (max 3 automatic pulls a day),
+and has a Sync button in the sidebar. Full responses are kept compressed, so
+`meliora-garmin reextract` can pull new fields out later without asking Garmin again.
+
 ## Your data vs. the sample
 
 Everything personal lives in `data/`, which is gitignored. `data-sample/` holds a
@@ -50,7 +64,8 @@ Then edit `data/config.toml` (home location, vault path, mountains and resorts) 
 - `src/meliora/weather.py` pulls ECMWF + NAM (Open-Meteo) for every place in the config,
   plus NWS alerts and the home forecast. Refreshed in the background on launch when over 3 h old.
 - `src/meliora/config.py` loads settings and picks `data/` or `data-sample/`.
-- `src/meliora/db.py` is SQLite in `data/`.
+- `src/meliora/garmin.py` is the Garmin collector and its pull policy.
+- `src/meliora/db.py` is SQLite in `data/`: a generic `metrics` table, `activities`, and raw responses.
 - `src/meliora/app.py` is the pywebview window. Methods on `Api` are callable from JS as `pywebview.api.*`.
 - `src/meliora/ui/` holds the HTML, CSS and JS front end. The sky follows the real sun
   position at your home location.

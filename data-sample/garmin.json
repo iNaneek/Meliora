@@ -1,0 +1,3017 @@
+{
+ "_note": "Fake Garmin data for demos. Load with `uv run meliora-garmin sample`.",
+ "metrics": [
+  {
+   "metric": "sleep_h",
+   "day": "2026-09-22",
+   "value": 7.59,
+   "unit": "h"
+  },
+  {
+   "metric": "sleep_deep_h",
+   "day": "2026-09-22",
+   "value": 1.08,
+   "unit": "h"
+  },
+  {
+   "metric": "sleep_rem_h",
+   "day": "2026-09-22",
+   "value": 1.53,
+   "unit": "h"
+  },
+  {
+   "metric": "sleep_awake_min",
+   "day": "2026-09-22",
+   "value": 22,
+   "unit": "min"
+  },
+  {
+   "metric": "sleep_score",
+   "day": "2026-09-22",
+   "value": 70,
+   "unit": "score"
+  },
+  {
+   "metric": "bed_time",
+   "day": "2026-09-22",
+   "value": 22.57,
+   "unit": "clock_h"
+  },
+  {
+   "metric": "wake_time",
+   "day": "2026-09-22",
+   "value": 8.13,
+   "unit": "clock_h"
+  },
+  {
+   "metric": "hrv_night_ms",
+   "day": "2026-09-22",
+   "value": 69,
+   "unit": "ms"
+  },
+  {
+   "metric": "hrv_week_ms",
+   "day": "2026-09-22",
+   "value": 62,
+   "unit": "ms"
+  },
+  {
+   "metric": "rhr",
+   "day": "2026-09-22",
+   "value": 52,
+   "unit": "bpm"
+  },
+  {
+   "metric": "steps",
+   "day": "2026-09-22",
+   "value": 6520,
+   "unit": "steps"
+  },
+  {
+   "metric": "bb_wake",
+   "day": "2026-09-22",
+   "value": 56,
+   "unit": "bb"
+  },
+  {
+   "metric": "bb_high",
+   "day": "2026-09-22",
+   "value": 72,
+   "unit": "bb"
+  },
+  {
+   "metric": "bb_low",
+   "day": "2026-09-22",
+   "value": 14,
+   "unit": "bb"
+  },
+  {
+   "metric": "intensity_min",
+   "day": "2026-09-22",
+   "value": 39,
+   "unit": "min"
+  },
+  {
+   "metric": "readiness",
+   "day": "2026-09-22",
+   "value": 67,
+   "unit": "score"
+  },
+  {
+   "metric": "vo2max",
+   "day": "2026-09-22",
+   "value": 54.0,
+   "unit": "ml/kg/min"
+  },
+  {
+   "metric": "sleep_h",
+   "day": "2026-09-23",
+   "value": 6.42,
+   "unit": "h"
+  },
+  {
+   "metric": "sleep_deep_h",
+   "day": "2026-09-23",
+   "value": 1.2,
+   "unit": "h"
+  },
+  {
+   "metric": "sleep_rem_h",
+   "day": "2026-09-23",
+   "value": 1.57,
+   "unit": "h"
+  },
+  {
+   "metric": "sleep_awake_min",
+   "day": "2026-09-23",
+   "value": 8,
+   "unit": "min"
+  },
+  {
+   "metric": "sleep_score",
+   "day": "2026-09-23",
+   "value": 67,
+   "unit": "score"
+  },
+  {
+   "metric": "bed_time",
+   "day": "2026-09-23",
+   "value": 22.72,
+   "unit": "clock_h"
+  },
+  {
+   "metric": "wake_time",
+   "day": "2026-09-23",
+   "value": 7.3,
+   "unit": "clock_h"
+  },
+  {
+   "metric": "hrv_night_ms",
+   "day": "2026-09-23",
+   "value": 60,
+   "unit": "ms"
+  },
+  {
+   "metric": "hrv_week_ms",
+   "day": "2026-09-23",
+   "value": 63,
+   "unit": "ms"
+  },
+  {
+   "metric": "rhr",
+   "day": "2026-09-23",
+   "value": 49,
+   "unit": "bpm"
+  },
+  {
+   "metric": "steps",
+   "day": "2026-09-23",
+   "value": 18509,
+   "unit": "steps"
+  },
+  {
+   "metric": "bb_wake",
+   "day": "2026-09-23",
+   "value": 76,
+   "unit": "bb"
+  },
+  {
+   "metric": "bb_high",
+   "day": "2026-09-23",
+   "value": 73,
+   "unit": "bb"
+  },
+  {
+   "metric": "bb_low",
+   "day": "2026-09-23",
+   "value": 10,
+   "unit": "bb"
+  },
+  {
+   "metric": "intensity_min",
+   "day": "2026-09-23",
+   "value": 58,
+   "unit": "min"
+  },
+  {
+   "metric": "readiness",
+   "day": "2026-09-23",
+   "value": 41,
+   "unit": "score"
+  },
+  {
+   "metric": "vo2max",
+   "day": "2026-09-23",
+   "value": 54.0,
+   "unit": "ml/kg/min"
+  },
+  {
+   "metric": "sleep_h",
+   "day": "2026-09-24",
+   "value": 6.76,
+   "unit": "h"
+  },
+  {
+   "metric": "sleep_deep_h",
+   "day": "2026-09-24",
+   "value": 1.09,
+   "unit": "h"
+  },
+  {
+   "metric": "sleep_rem_h",
+   "day": "2026-09-24",
+   "value": 1.24,
+   "unit": "h"
+  },
+  {
+   "metric": "sleep_awake_min",
+   "day": "2026-09-24",
+   "value": 37,
+   "unit": "min"
+  },
+  {
+   "metric": "sleep_score",
+   "day": "2026-09-24",
+   "value": 67,
+   "unit": "score"
+  },
+  {
+   "metric": "bed_time",
+   "day": "2026-09-24",
+   "value": 0.83,
+   "unit": "clock_h"
+  },
+  {
+   "metric": "wake_time",
+   "day": "2026-09-24",
+   "value": 7.18,
+   "unit": "clock_h"
+  },
+  {
+   "metric": "hrv_night_ms",
+   "day": "2026-09-24",
+   "value": 69,
+   "unit": "ms"
+  },
+  {
+   "metric": "hrv_week_ms",
+   "day": "2026-09-24",
+   "value": 64,
+   "unit": "ms"
+  },
+  {
+   "metric": "rhr",
+   "day": "2026-09-24",
+   "value": 51,
+   "unit": "bpm"
+  },
+  {
+   "metric": "steps",
+   "day": "2026-09-24",
+   "value": 15459,
+   "unit": "steps"
+  },
+  {
+   "metric": "bb_wake",
+   "day": "2026-09-24",
+   "value": 67,
+   "unit": "bb"
+  },
+  {
+   "metric": "bb_high",
+   "day": "2026-09-24",
+   "value": 92,
+   "unit": "bb"
+  },
+  {
+   "metric": "bb_low",
+   "day": "2026-09-24",
+   "value": 10,
+   "unit": "bb"
+  },
+  {
+   "metric": "intensity_min",
+   "day": "2026-09-24",
+   "value": 15,
+   "unit": "min"
+  },
+  {
+   "metric": "readiness",
+   "day": "2026-09-24",
+   "value": 77,
+   "unit": "score"
+  },
+  {
+   "metric": "vo2max",
+   "day": "2026-09-24",
+   "value": 53.9,
+   "unit": "ml/kg/min"
+  },
+  {
+   "metric": "sleep_h",
+   "day": "2026-09-25",
+   "value": 6.86,
+   "unit": "h"
+  },
+  {
+   "metric": "sleep_deep_h",
+   "day": "2026-09-25",
+   "value": 1.21,
+   "unit": "h"
+  },
+  {
+   "metric": "sleep_rem_h",
+   "day": "2026-09-25",
+   "value": 1.69,
+   "unit": "h"
+  },
+  {
+   "metric": "sleep_awake_min",
+   "day": "2026-09-25",
+   "value": 18,
+   "unit": "min"
+  },
+  {
+   "metric": "sleep_score",
+   "day": "2026-09-25",
+   "value": 66,
+   "unit": "score"
+  },
+  {
+   "metric": "bed_time",
+   "day": "2026-09-25",
+   "value": 22.84,
+   "unit": "clock_h"
+  },
+  {
+   "metric": "wake_time",
+   "day": "2026-09-25",
+   "value": 6.89,
+   "unit": "clock_h"
+  },
+  {
+   "metric": "hrv_night_ms",
+   "day": "2026-09-25",
+   "value": 73,
+   "unit": "ms"
+  },
+  {
+   "metric": "hrv_week_ms",
+   "day": "2026-09-25",
+   "value": 62,
+   "unit": "ms"
+  },
+  {
+   "metric": "rhr",
+   "day": "2026-09-25",
+   "value": 48,
+   "unit": "bpm"
+  },
+  {
+   "metric": "steps",
+   "day": "2026-09-25",
+   "value": 14751,
+   "unit": "steps"
+  },
+  {
+   "metric": "bb_wake",
+   "day": "2026-09-25",
+   "value": 70,
+   "unit": "bb"
+  },
+  {
+   "metric": "bb_high",
+   "day": "2026-09-25",
+   "value": 75,
+   "unit": "bb"
+  },
+  {
+   "metric": "bb_low",
+   "day": "2026-09-25",
+   "value": 22,
+   "unit": "bb"
+  },
+  {
+   "metric": "intensity_min",
+   "day": "2026-09-25",
+   "value": 58,
+   "unit": "min"
+  },
+  {
+   "metric": "readiness",
+   "day": "2026-09-25",
+   "value": 52,
+   "unit": "score"
+  },
+  {
+   "metric": "vo2max",
+   "day": "2026-09-25",
+   "value": 54.3,
+   "unit": "ml/kg/min"
+  },
+  {
+   "metric": "sleep_h",
+   "day": "2026-09-26",
+   "value": 7.59,
+   "unit": "h"
+  },
+  {
+   "metric": "sleep_deep_h",
+   "day": "2026-09-26",
+   "value": 1.4,
+   "unit": "h"
+  },
+  {
+   "metric": "sleep_rem_h",
+   "day": "2026-09-26",
+   "value": 1.78,
+   "unit": "h"
+  },
+  {
+   "metric": "sleep_awake_min",
+   "day": "2026-09-26",
+   "value": 11,
+   "unit": "min"
+  },
+  {
+   "metric": "sleep_score",
+   "day": "2026-09-26",
+   "value": 71,
+   "unit": "score"
+  },
+  {
+   "metric": "bed_time",
+   "day": "2026-09-26",
+   "value": 22.38,
+   "unit": "clock_h"
+  },
+  {
+   "metric": "wake_time",
+   "day": "2026-09-26",
+   "value": 7.02,
+   "unit": "clock_h"
+  },
+  {
+   "metric": "hrv_night_ms",
+   "day": "2026-09-26",
+   "value": 60,
+   "unit": "ms"
+  },
+  {
+   "metric": "hrv_week_ms",
+   "day": "2026-09-26",
+   "value": 62,
+   "unit": "ms"
+  },
+  {
+   "metric": "rhr",
+   "day": "2026-09-26",
+   "value": 49,
+   "unit": "bpm"
+  },
+  {
+   "metric": "steps",
+   "day": "2026-09-26",
+   "value": 15292,
+   "unit": "steps"
+  },
+  {
+   "metric": "bb_wake",
+   "day": "2026-09-26",
+   "value": 75,
+   "unit": "bb"
+  },
+  {
+   "metric": "bb_high",
+   "day": "2026-09-26",
+   "value": 76,
+   "unit": "bb"
+  },
+  {
+   "metric": "bb_low",
+   "day": "2026-09-26",
+   "value": 28,
+   "unit": "bb"
+  },
+  {
+   "metric": "intensity_min",
+   "day": "2026-09-26",
+   "value": 73,
+   "unit": "min"
+  },
+  {
+   "metric": "readiness",
+   "day": "2026-09-26",
+   "value": 60,
+   "unit": "score"
+  },
+  {
+   "metric": "vo2max",
+   "day": "2026-09-26",
+   "value": 54.2,
+   "unit": "ml/kg/min"
+  },
+  {
+   "metric": "sleep_h",
+   "day": "2026-09-27",
+   "value": 7.31,
+   "unit": "h"
+  },
+  {
+   "metric": "sleep_deep_h",
+   "day": "2026-09-27",
+   "value": 1.46,
+   "unit": "h"
+  },
+  {
+   "metric": "sleep_rem_h",
+   "day": "2026-09-27",
+   "value": 1.57,
+   "unit": "h"
+  },
+  {
+   "metric": "sleep_awake_min",
+   "day": "2026-09-27",
+   "value": 45,
+   "unit": "min"
+  },
+  {
+   "metric": "sleep_score",
+   "day": "2026-09-27",
+   "value": 71,
+   "unit": "score"
+  },
+  {
+   "metric": "bed_time",
+   "day": "2026-09-27",
+   "value": 22.87,
+   "unit": "clock_h"
+  },
+  {
+   "metric": "wake_time",
+   "day": "2026-09-27",
+   "value": 8.79,
+   "unit": "clock_h"
+  },
+  {
+   "metric": "hrv_night_ms",
+   "day": "2026-09-27",
+   "value": 68,
+   "unit": "ms"
+  },
+  {
+   "metric": "hrv_week_ms",
+   "day": "2026-09-27",
+   "value": 65,
+   "unit": "ms"
+  },
+  {
+   "metric": "rhr",
+   "day": "2026-09-27",
+   "value": 47,
+   "unit": "bpm"
+  },
+  {
+   "metric": "steps",
+   "day": "2026-09-27",
+   "value": 18382,
+   "unit": "steps"
+  },
+  {
+   "metric": "bb_wake",
+   "day": "2026-09-27",
+   "value": 58,
+   "unit": "bb"
+  },
+  {
+   "metric": "bb_high",
+   "day": "2026-09-27",
+   "value": 97,
+   "unit": "bb"
+  },
+  {
+   "metric": "bb_low",
+   "day": "2026-09-27",
+   "value": 11,
+   "unit": "bb"
+  },
+  {
+   "metric": "intensity_min",
+   "day": "2026-09-27",
+   "value": 29,
+   "unit": "min"
+  },
+  {
+   "metric": "readiness",
+   "day": "2026-09-27",
+   "value": 75,
+   "unit": "score"
+  },
+  {
+   "metric": "vo2max",
+   "day": "2026-09-27",
+   "value": 54.0,
+   "unit": "ml/kg/min"
+  },
+  {
+   "metric": "sleep_h",
+   "day": "2026-09-28",
+   "value": 7.71,
+   "unit": "h"
+  },
+  {
+   "metric": "sleep_deep_h",
+   "day": "2026-09-28",
+   "value": 1.45,
+   "unit": "h"
+  },
+  {
+   "metric": "sleep_rem_h",
+   "day": "2026-09-28",
+   "value": 1.63,
+   "unit": "h"
+  },
+  {
+   "metric": "sleep_awake_min",
+   "day": "2026-09-28",
+   "value": 37,
+   "unit": "min"
+  },
+  {
+   "metric": "sleep_score",
+   "day": "2026-09-28",
+   "value": 77,
+   "unit": "score"
+  },
+  {
+   "metric": "bed_time",
+   "day": "2026-09-28",
+   "value": 0.82,
+   "unit": "clock_h"
+  },
+  {
+   "metric": "wake_time",
+   "day": "2026-09-28",
+   "value": 8.44,
+   "unit": "clock_h"
+  },
+  {
+   "metric": "hrv_night_ms",
+   "day": "2026-09-28",
+   "value": 52,
+   "unit": "ms"
+  },
+  {
+   "metric": "hrv_week_ms",
+   "day": "2026-09-28",
+   "value": 62,
+   "unit": "ms"
+  },
+  {
+   "metric": "rhr",
+   "day": "2026-09-28",
+   "value": 54,
+   "unit": "bpm"
+  },
+  {
+   "metric": "steps",
+   "day": "2026-09-28",
+   "value": 18302,
+   "unit": "steps"
+  },
+  {
+   "metric": "bb_wake",
+   "day": "2026-09-28",
+   "value": 72,
+   "unit": "bb"
+  },
+  {
+   "metric": "bb_high",
+   "day": "2026-09-28",
+   "value": 94,
+   "unit": "bb"
+  },
+  {
+   "metric": "bb_low",
+   "day": "2026-09-28",
+   "value": 28,
+   "unit": "bb"
+  },
+  {
+   "metric": "intensity_min",
+   "day": "2026-09-28",
+   "value": 53,
+   "unit": "min"
+  },
+  {
+   "metric": "readiness",
+   "day": "2026-09-28",
+   "value": 42,
+   "unit": "score"
+  },
+  {
+   "metric": "vo2max",
+   "day": "2026-09-28",
+   "value": 54.0,
+   "unit": "ml/kg/min"
+  },
+  {
+   "metric": "sleep_h",
+   "day": "2026-09-29",
+   "value": 6.24,
+   "unit": "h"
+  },
+  {
+   "metric": "sleep_deep_h",
+   "day": "2026-09-29",
+   "value": 0.88,
+   "unit": "h"
+  },
+  {
+   "metric": "sleep_rem_h",
+   "day": "2026-09-29",
+   "value": 1.48,
+   "unit": "h"
+  },
+  {
+   "metric": "sleep_awake_min",
+   "day": "2026-09-29",
+   "value": 24,
+   "unit": "min"
+  },
+  {
+   "metric": "sleep_score",
+   "day": "2026-09-29",
+   "value": 68,
+   "unit": "score"
+  },
+  {
+   "metric": "bed_time",
+   "day": "2026-09-29",
+   "value": 0.28,
+   "unit": "clock_h"
+  },
+  {
+   "metric": "wake_time",
+   "day": "2026-09-29",
+   "value": 7.52,
+   "unit": "clock_h"
+  },
+  {
+   "metric": "hrv_night_ms",
+   "day": "2026-09-29",
+   "value": 55,
+   "unit": "ms"
+  },
+  {
+   "metric": "hrv_week_ms",
+   "day": "2026-09-29",
+   "value": 64,
+   "unit": "ms"
+  },
+  {
+   "metric": "rhr",
+   "day": "2026-09-29",
+   "value": 54,
+   "unit": "bpm"
+  },
+  {
+   "metric": "steps",
+   "day": "2026-09-29",
+   "value": 15977,
+   "unit": "steps"
+  },
+  {
+   "metric": "bb_wake",
+   "day": "2026-09-29",
+   "value": 67,
+   "unit": "bb"
+  },
+  {
+   "metric": "bb_high",
+   "day": "2026-09-29",
+   "value": 74,
+   "unit": "bb"
+  },
+  {
+   "metric": "bb_low",
+   "day": "2026-09-29",
+   "value": 19,
+   "unit": "bb"
+  },
+  {
+   "metric": "intensity_min",
+   "day": "2026-09-29",
+   "value": 107,
+   "unit": "min"
+  },
+  {
+   "metric": "readiness",
+   "day": "2026-09-29",
+   "value": 45,
+   "unit": "score"
+  },
+  {
+   "metric": "vo2max",
+   "day": "2026-09-29",
+   "value": 54.2,
+   "unit": "ml/kg/min"
+  },
+  {
+   "metric": "sleep_h",
+   "day": "2026-09-30",
+   "value": 7.17,
+   "unit": "h"
+  },
+  {
+   "metric": "sleep_deep_h",
+   "day": "2026-09-30",
+   "value": 1.07,
+   "unit": "h"
+  },
+  {
+   "metric": "sleep_rem_h",
+   "day": "2026-09-30",
+   "value": 1.5,
+   "unit": "h"
+  },
+  {
+   "metric": "sleep_awake_min",
+   "day": "2026-09-30",
+   "value": 27,
+   "unit": "min"
+  },
+  {
+   "metric": "sleep_score",
+   "day": "2026-09-30",
+   "value": 67,
+   "unit": "score"
+  },
+  {
+   "metric": "bed_time",
+   "day": "2026-09-30",
+   "value": 22.93,
+   "unit": "clock_h"
+  },
+  {
+   "metric": "wake_time",
+   "day": "2026-09-30",
+   "value": 7.68,
+   "unit": "clock_h"
+  },
+  {
+   "metric": "hrv_night_ms",
+   "day": "2026-09-30",
+   "value": 54,
+   "unit": "ms"
+  },
+  {
+   "metric": "hrv_week_ms",
+   "day": "2026-09-30",
+   "value": 62,
+   "unit": "ms"
+  },
+  {
+   "metric": "rhr",
+   "day": "2026-09-30",
+   "value": 53,
+   "unit": "bpm"
+  },
+  {
+   "metric": "steps",
+   "day": "2026-09-30",
+   "value": 7133,
+   "unit": "steps"
+  },
+  {
+   "metric": "bb_wake",
+   "day": "2026-09-30",
+   "value": 89,
+   "unit": "bb"
+  },
+  {
+   "metric": "bb_high",
+   "day": "2026-09-30",
+   "value": 94,
+   "unit": "bb"
+  },
+  {
+   "metric": "bb_low",
+   "day": "2026-09-30",
+   "value": 12,
+   "unit": "bb"
+  },
+  {
+   "metric": "intensity_min",
+   "day": "2026-09-30",
+   "value": 26,
+   "unit": "min"
+  },
+  {
+   "metric": "readiness",
+   "day": "2026-09-30",
+   "value": 77,
+   "unit": "score"
+  },
+  {
+   "metric": "vo2max",
+   "day": "2026-09-30",
+   "value": 54.2,
+   "unit": "ml/kg/min"
+  },
+  {
+   "metric": "sleep_h",
+   "day": "2026-10-01",
+   "value": 7.34,
+   "unit": "h"
+  },
+  {
+   "metric": "sleep_deep_h",
+   "day": "2026-10-01",
+   "value": 1.18,
+   "unit": "h"
+  },
+  {
+   "metric": "sleep_rem_h",
+   "day": "2026-10-01",
+   "value": 1.83,
+   "unit": "h"
+  },
+  {
+   "metric": "sleep_awake_min",
+   "day": "2026-10-01",
+   "value": 35,
+   "unit": "min"
+  },
+  {
+   "metric": "sleep_score",
+   "day": "2026-10-01",
+   "value": 79,
+   "unit": "score"
+  },
+  {
+   "metric": "bed_time",
+   "day": "2026-10-01",
+   "value": 0.72,
+   "unit": "clock_h"
+  },
+  {
+   "metric": "wake_time",
+   "day": "2026-10-01",
+   "value": 8.16,
+   "unit": "clock_h"
+  },
+  {
+   "metric": "hrv_night_ms",
+   "day": "2026-10-01",
+   "value": 74,
+   "unit": "ms"
+  },
+  {
+   "metric": "hrv_week_ms",
+   "day": "2026-10-01",
+   "value": 63,
+   "unit": "ms"
+  },
+  {
+   "metric": "rhr",
+   "day": "2026-10-01",
+   "value": 50,
+   "unit": "bpm"
+  },
+  {
+   "metric": "steps",
+   "day": "2026-10-01",
+   "value": 12537,
+   "unit": "steps"
+  },
+  {
+   "metric": "bb_wake",
+   "day": "2026-10-01",
+   "value": 78,
+   "unit": "bb"
+  },
+  {
+   "metric": "bb_high",
+   "day": "2026-10-01",
+   "value": 84,
+   "unit": "bb"
+  },
+  {
+   "metric": "bb_low",
+   "day": "2026-10-01",
+   "value": 24,
+   "unit": "bb"
+  },
+  {
+   "metric": "intensity_min",
+   "day": "2026-10-01",
+   "value": 67,
+   "unit": "min"
+  },
+  {
+   "metric": "readiness",
+   "day": "2026-10-01",
+   "value": 42,
+   "unit": "score"
+  },
+  {
+   "metric": "vo2max",
+   "day": "2026-10-01",
+   "value": 54.1,
+   "unit": "ml/kg/min"
+  },
+  {
+   "metric": "sleep_h",
+   "day": "2026-10-02",
+   "value": 6.42,
+   "unit": "h"
+  },
+  {
+   "metric": "sleep_deep_h",
+   "day": "2026-10-02",
+   "value": 0.94,
+   "unit": "h"
+  },
+  {
+   "metric": "sleep_rem_h",
+   "day": "2026-10-02",
+   "value": 1.48,
+   "unit": "h"
+  },
+  {
+   "metric": "sleep_awake_min",
+   "day": "2026-10-02",
+   "value": 22,
+   "unit": "min"
+  },
+  {
+   "metric": "sleep_score",
+   "day": "2026-10-02",
+   "value": 57,
+   "unit": "score"
+  },
+  {
+   "metric": "bed_time",
+   "day": "2026-10-02",
+   "value": 22.38,
+   "unit": "clock_h"
+  },
+  {
+   "metric": "wake_time",
+   "day": "2026-10-02",
+   "value": 7.06,
+   "unit": "clock_h"
+  },
+  {
+   "metric": "hrv_night_ms",
+   "day": "2026-10-02",
+   "value": 68,
+   "unit": "ms"
+  },
+  {
+   "metric": "hrv_week_ms",
+   "day": "2026-10-02",
+   "value": 63,
+   "unit": "ms"
+  },
+  {
+   "metric": "rhr",
+   "day": "2026-10-02",
+   "value": 50,
+   "unit": "bpm"
+  },
+  {
+   "metric": "steps",
+   "day": "2026-10-02",
+   "value": 16960,
+   "unit": "steps"
+  },
+  {
+   "metric": "bb_wake",
+   "day": "2026-10-02",
+   "value": 86,
+   "unit": "bb"
+  },
+  {
+   "metric": "bb_high",
+   "day": "2026-10-02",
+   "value": 76,
+   "unit": "bb"
+  },
+  {
+   "metric": "bb_low",
+   "day": "2026-10-02",
+   "value": 25,
+   "unit": "bb"
+  },
+  {
+   "metric": "intensity_min",
+   "day": "2026-10-02",
+   "value": 26,
+   "unit": "min"
+  },
+  {
+   "metric": "readiness",
+   "day": "2026-10-02",
+   "value": 81,
+   "unit": "score"
+  },
+  {
+   "metric": "vo2max",
+   "day": "2026-10-02",
+   "value": 54.4,
+   "unit": "ml/kg/min"
+  },
+  {
+   "metric": "sleep_h",
+   "day": "2026-10-03",
+   "value": 7.4,
+   "unit": "h"
+  },
+  {
+   "metric": "sleep_deep_h",
+   "day": "2026-10-03",
+   "value": 1.32,
+   "unit": "h"
+  },
+  {
+   "metric": "sleep_rem_h",
+   "day": "2026-10-03",
+   "value": 1.8,
+   "unit": "h"
+  },
+  {
+   "metric": "sleep_awake_min",
+   "day": "2026-10-03",
+   "value": 34,
+   "unit": "min"
+  },
+  {
+   "metric": "sleep_score",
+   "day": "2026-10-03",
+   "value": 69,
+   "unit": "score"
+  },
+  {
+   "metric": "bed_time",
+   "day": "2026-10-03",
+   "value": 22.55,
+   "unit": "clock_h"
+  },
+  {
+   "metric": "wake_time",
+   "day": "2026-10-03",
+   "value": 7.32,
+   "unit": "clock_h"
+  },
+  {
+   "metric": "hrv_night_ms",
+   "day": "2026-10-03",
+   "value": 65,
+   "unit": "ms"
+  },
+  {
+   "metric": "hrv_week_ms",
+   "day": "2026-10-03",
+   "value": 65,
+   "unit": "ms"
+  },
+  {
+   "metric": "rhr",
+   "day": "2026-10-03",
+   "value": 53,
+   "unit": "bpm"
+  },
+  {
+   "metric": "steps",
+   "day": "2026-10-03",
+   "value": 17945,
+   "unit": "steps"
+  },
+  {
+   "metric": "bb_wake",
+   "day": "2026-10-03",
+   "value": 58,
+   "unit": "bb"
+  },
+  {
+   "metric": "bb_high",
+   "day": "2026-10-03",
+   "value": 91,
+   "unit": "bb"
+  },
+  {
+   "metric": "bb_low",
+   "day": "2026-10-03",
+   "value": 28,
+   "unit": "bb"
+  },
+  {
+   "metric": "intensity_min",
+   "day": "2026-10-03",
+   "value": 92,
+   "unit": "min"
+  },
+  {
+   "metric": "readiness",
+   "day": "2026-10-03",
+   "value": 41,
+   "unit": "score"
+  },
+  {
+   "metric": "vo2max",
+   "day": "2026-10-03",
+   "value": 54.0,
+   "unit": "ml/kg/min"
+  },
+  {
+   "metric": "sleep_h",
+   "day": "2026-10-04",
+   "value": 6.33,
+   "unit": "h"
+  },
+  {
+   "metric": "sleep_deep_h",
+   "day": "2026-10-04",
+   "value": 1.11,
+   "unit": "h"
+  },
+  {
+   "metric": "sleep_rem_h",
+   "day": "2026-10-04",
+   "value": 1.35,
+   "unit": "h"
+  },
+  {
+   "metric": "sleep_awake_min",
+   "day": "2026-10-04",
+   "value": 25,
+   "unit": "min"
+  },
+  {
+   "metric": "sleep_score",
+   "day": "2026-10-04",
+   "value": 62,
+   "unit": "score"
+  },
+  {
+   "metric": "bed_time",
+   "day": "2026-10-04",
+   "value": 0.57,
+   "unit": "clock_h"
+  },
+  {
+   "metric": "wake_time",
+   "day": "2026-10-04",
+   "value": 6.4,
+   "unit": "clock_h"
+  },
+  {
+   "metric": "hrv_night_ms",
+   "day": "2026-10-04",
+   "value": 77,
+   "unit": "ms"
+  },
+  {
+   "metric": "hrv_week_ms",
+   "day": "2026-10-04",
+   "value": 66,
+   "unit": "ms"
+  },
+  {
+   "metric": "rhr",
+   "day": "2026-10-04",
+   "value": 47,
+   "unit": "bpm"
+  },
+  {
+   "metric": "steps",
+   "day": "2026-10-04",
+   "value": 6828,
+   "unit": "steps"
+  },
+  {
+   "metric": "bb_wake",
+   "day": "2026-10-04",
+   "value": 89,
+   "unit": "bb"
+  },
+  {
+   "metric": "bb_high",
+   "day": "2026-10-04",
+   "value": 96,
+   "unit": "bb"
+  },
+  {
+   "metric": "bb_low",
+   "day": "2026-10-04",
+   "value": 8,
+   "unit": "bb"
+  },
+  {
+   "metric": "intensity_min",
+   "day": "2026-10-04",
+   "value": 21,
+   "unit": "min"
+  },
+  {
+   "metric": "readiness",
+   "day": "2026-10-04",
+   "value": 83,
+   "unit": "score"
+  },
+  {
+   "metric": "vo2max",
+   "day": "2026-10-04",
+   "value": 54.4,
+   "unit": "ml/kg/min"
+  },
+  {
+   "metric": "sleep_h",
+   "day": "2026-10-05",
+   "value": 6.27,
+   "unit": "h"
+  },
+  {
+   "metric": "sleep_deep_h",
+   "day": "2026-10-05",
+   "value": 1.12,
+   "unit": "h"
+  },
+  {
+   "metric": "sleep_rem_h",
+   "day": "2026-10-05",
+   "value": 1.24,
+   "unit": "h"
+  },
+  {
+   "metric": "sleep_awake_min",
+   "day": "2026-10-05",
+   "value": 33,
+   "unit": "min"
+  },
+  {
+   "metric": "sleep_score",
+   "day": "2026-10-05",
+   "value": 67,
+   "unit": "score"
+  },
+  {
+   "metric": "bed_time",
+   "day": "2026-10-05",
+   "value": 22.73,
+   "unit": "clock_h"
+  },
+  {
+   "metric": "wake_time",
+   "day": "2026-10-05",
+   "value": 6.21,
+   "unit": "clock_h"
+  },
+  {
+   "metric": "hrv_night_ms",
+   "day": "2026-10-05",
+   "value": 64,
+   "unit": "ms"
+  },
+  {
+   "metric": "hrv_week_ms",
+   "day": "2026-10-05",
+   "value": 64,
+   "unit": "ms"
+  },
+  {
+   "metric": "rhr",
+   "day": "2026-10-05",
+   "value": 53,
+   "unit": "bpm"
+  },
+  {
+   "metric": "steps",
+   "day": "2026-10-05",
+   "value": 10673,
+   "unit": "steps"
+  },
+  {
+   "metric": "bb_wake",
+   "day": "2026-10-05",
+   "value": 82,
+   "unit": "bb"
+  },
+  {
+   "metric": "bb_high",
+   "day": "2026-10-05",
+   "value": 92,
+   "unit": "bb"
+  },
+  {
+   "metric": "bb_low",
+   "day": "2026-10-05",
+   "value": 31,
+   "unit": "bb"
+  },
+  {
+   "metric": "intensity_min",
+   "day": "2026-10-05",
+   "value": 110,
+   "unit": "min"
+  },
+  {
+   "metric": "readiness",
+   "day": "2026-10-05",
+   "value": 70,
+   "unit": "score"
+  },
+  {
+   "metric": "vo2max",
+   "day": "2026-10-05",
+   "value": 54.3,
+   "unit": "ml/kg/min"
+  },
+  {
+   "metric": "sleep_h",
+   "day": "2026-10-06",
+   "value": 7.16,
+   "unit": "h"
+  },
+  {
+   "metric": "sleep_deep_h",
+   "day": "2026-10-06",
+   "value": 1.11,
+   "unit": "h"
+  },
+  {
+   "metric": "sleep_rem_h",
+   "day": "2026-10-06",
+   "value": 1.41,
+   "unit": "h"
+  },
+  {
+   "metric": "sleep_awake_min",
+   "day": "2026-10-06",
+   "value": 11,
+   "unit": "min"
+  },
+  {
+   "metric": "sleep_score",
+   "day": "2026-10-06",
+   "value": 72,
+   "unit": "score"
+  },
+  {
+   "metric": "bed_time",
+   "day": "2026-10-06",
+   "value": 23.71,
+   "unit": "clock_h"
+  },
+  {
+   "metric": "wake_time",
+   "day": "2026-10-06",
+   "value": 8.14,
+   "unit": "clock_h"
+  },
+  {
+   "metric": "hrv_night_ms",
+   "day": "2026-10-06",
+   "value": 53,
+   "unit": "ms"
+  },
+  {
+   "metric": "hrv_week_ms",
+   "day": "2026-10-06",
+   "value": 62,
+   "unit": "ms"
+  },
+  {
+   "metric": "rhr",
+   "day": "2026-10-06",
+   "value": 53,
+   "unit": "bpm"
+  },
+  {
+   "metric": "steps",
+   "day": "2026-10-06",
+   "value": 14238,
+   "unit": "steps"
+  },
+  {
+   "metric": "bb_wake",
+   "day": "2026-10-06",
+   "value": 88,
+   "unit": "bb"
+  },
+  {
+   "metric": "bb_high",
+   "day": "2026-10-06",
+   "value": 75,
+   "unit": "bb"
+  },
+  {
+   "metric": "bb_low",
+   "day": "2026-10-06",
+   "value": 9,
+   "unit": "bb"
+  },
+  {
+   "metric": "intensity_min",
+   "day": "2026-10-06",
+   "value": 75,
+   "unit": "min"
+  },
+  {
+   "metric": "readiness",
+   "day": "2026-10-06",
+   "value": 40,
+   "unit": "score"
+  },
+  {
+   "metric": "vo2max",
+   "day": "2026-10-06",
+   "value": 54.4,
+   "unit": "ml/kg/min"
+  },
+  {
+   "metric": "sleep_h",
+   "day": "2026-10-07",
+   "value": 8.44,
+   "unit": "h"
+  },
+  {
+   "metric": "sleep_deep_h",
+   "day": "2026-10-07",
+   "value": 1.57,
+   "unit": "h"
+  },
+  {
+   "metric": "sleep_rem_h",
+   "day": "2026-10-07",
+   "value": 1.91,
+   "unit": "h"
+  },
+  {
+   "metric": "sleep_awake_min",
+   "day": "2026-10-07",
+   "value": 10,
+   "unit": "min"
+  },
+  {
+   "metric": "sleep_score",
+   "day": "2026-10-07",
+   "value": 85,
+   "unit": "score"
+  },
+  {
+   "metric": "bed_time",
+   "day": "2026-10-07",
+   "value": 23.39,
+   "unit": "clock_h"
+  },
+  {
+   "metric": "wake_time",
+   "day": "2026-10-07",
+   "value": 7.72,
+   "unit": "clock_h"
+  },
+  {
+   "metric": "hrv_night_ms",
+   "day": "2026-10-07",
+   "value": 68,
+   "unit": "ms"
+  },
+  {
+   "metric": "hrv_week_ms",
+   "day": "2026-10-07",
+   "value": 64,
+   "unit": "ms"
+  },
+  {
+   "metric": "rhr",
+   "day": "2026-10-07",
+   "value": 50,
+   "unit": "bpm"
+  },
+  {
+   "metric": "steps",
+   "day": "2026-10-07",
+   "value": 9346,
+   "unit": "steps"
+  },
+  {
+   "metric": "bb_wake",
+   "day": "2026-10-07",
+   "value": 75,
+   "unit": "bb"
+  },
+  {
+   "metric": "bb_high",
+   "day": "2026-10-07",
+   "value": 77,
+   "unit": "bb"
+  },
+  {
+   "metric": "bb_low",
+   "day": "2026-10-07",
+   "value": 16,
+   "unit": "bb"
+  },
+  {
+   "metric": "intensity_min",
+   "day": "2026-10-07",
+   "value": 60,
+   "unit": "min"
+  },
+  {
+   "metric": "readiness",
+   "day": "2026-10-07",
+   "value": 43,
+   "unit": "score"
+  },
+  {
+   "metric": "vo2max",
+   "day": "2026-10-07",
+   "value": 54.4,
+   "unit": "ml/kg/min"
+  },
+  {
+   "metric": "sleep_h",
+   "day": "2026-10-08",
+   "value": 6.64,
+   "unit": "h"
+  },
+  {
+   "metric": "sleep_deep_h",
+   "day": "2026-10-08",
+   "value": 1.1,
+   "unit": "h"
+  },
+  {
+   "metric": "sleep_rem_h",
+   "day": "2026-10-08",
+   "value": 1.59,
+   "unit": "h"
+  },
+  {
+   "metric": "sleep_awake_min",
+   "day": "2026-10-08",
+   "value": 12,
+   "unit": "min"
+  },
+  {
+   "metric": "sleep_score",
+   "day": "2026-10-08",
+   "value": 59,
+   "unit": "score"
+  },
+  {
+   "metric": "bed_time",
+   "day": "2026-10-08",
+   "value": 23.92,
+   "unit": "clock_h"
+  },
+  {
+   "metric": "wake_time",
+   "day": "2026-10-08",
+   "value": 7.66,
+   "unit": "clock_h"
+  },
+  {
+   "metric": "hrv_night_ms",
+   "day": "2026-10-08",
+   "value": 55,
+   "unit": "ms"
+  },
+  {
+   "metric": "hrv_week_ms",
+   "day": "2026-10-08",
+   "value": 62,
+   "unit": "ms"
+  },
+  {
+   "metric": "rhr",
+   "day": "2026-10-08",
+   "value": 54,
+   "unit": "bpm"
+  },
+  {
+   "metric": "steps",
+   "day": "2026-10-08",
+   "value": 9492,
+   "unit": "steps"
+  },
+  {
+   "metric": "bb_wake",
+   "day": "2026-10-08",
+   "value": 87,
+   "unit": "bb"
+  },
+  {
+   "metric": "bb_high",
+   "day": "2026-10-08",
+   "value": 78,
+   "unit": "bb"
+  },
+  {
+   "metric": "bb_low",
+   "day": "2026-10-08",
+   "value": 12,
+   "unit": "bb"
+  },
+  {
+   "metric": "intensity_min",
+   "day": "2026-10-08",
+   "value": 54,
+   "unit": "min"
+  },
+  {
+   "metric": "readiness",
+   "day": "2026-10-08",
+   "value": 91,
+   "unit": "score"
+  },
+  {
+   "metric": "vo2max",
+   "day": "2026-10-08",
+   "value": 54.1,
+   "unit": "ml/kg/min"
+  },
+  {
+   "metric": "sleep_h",
+   "day": "2026-10-09",
+   "value": 7.77,
+   "unit": "h"
+  },
+  {
+   "metric": "sleep_deep_h",
+   "day": "2026-10-09",
+   "value": 1.47,
+   "unit": "h"
+  },
+  {
+   "metric": "sleep_rem_h",
+   "day": "2026-10-09",
+   "value": 2.01,
+   "unit": "h"
+  },
+  {
+   "metric": "sleep_awake_min",
+   "day": "2026-10-09",
+   "value": 41,
+   "unit": "min"
+  },
+  {
+   "metric": "sleep_score",
+   "day": "2026-10-09",
+   "value": 70,
+   "unit": "score"
+  },
+  {
+   "metric": "bed_time",
+   "day": "2026-10-09",
+   "value": 0.42,
+   "unit": "clock_h"
+  },
+  {
+   "metric": "wake_time",
+   "day": "2026-10-09",
+   "value": 6.98,
+   "unit": "clock_h"
+  },
+  {
+   "metric": "hrv_night_ms",
+   "day": "2026-10-09",
+   "value": 73,
+   "unit": "ms"
+  },
+  {
+   "metric": "hrv_week_ms",
+   "day": "2026-10-09",
+   "value": 62,
+   "unit": "ms"
+  },
+  {
+   "metric": "rhr",
+   "day": "2026-10-09",
+   "value": 48,
+   "unit": "bpm"
+  },
+  {
+   "metric": "steps",
+   "day": "2026-10-09",
+   "value": 10333,
+   "unit": "steps"
+  },
+  {
+   "metric": "bb_wake",
+   "day": "2026-10-09",
+   "value": 62,
+   "unit": "bb"
+  },
+  {
+   "metric": "bb_high",
+   "day": "2026-10-09",
+   "value": 98,
+   "unit": "bb"
+  },
+  {
+   "metric": "bb_low",
+   "day": "2026-10-09",
+   "value": 11,
+   "unit": "bb"
+  },
+  {
+   "metric": "intensity_min",
+   "day": "2026-10-09",
+   "value": 105,
+   "unit": "min"
+  },
+  {
+   "metric": "readiness",
+   "day": "2026-10-09",
+   "value": 70,
+   "unit": "score"
+  },
+  {
+   "metric": "vo2max",
+   "day": "2026-10-09",
+   "value": 54.2,
+   "unit": "ml/kg/min"
+  },
+  {
+   "metric": "sleep_h",
+   "day": "2026-10-10",
+   "value": 6.59,
+   "unit": "h"
+  },
+  {
+   "metric": "sleep_deep_h",
+   "day": "2026-10-10",
+   "value": 1.03,
+   "unit": "h"
+  },
+  {
+   "metric": "sleep_rem_h",
+   "day": "2026-10-10",
+   "value": 1.37,
+   "unit": "h"
+  },
+  {
+   "metric": "sleep_awake_min",
+   "day": "2026-10-10",
+   "value": 24,
+   "unit": "min"
+  },
+  {
+   "metric": "sleep_score",
+   "day": "2026-10-10",
+   "value": 65,
+   "unit": "score"
+  },
+  {
+   "metric": "bed_time",
+   "day": "2026-10-10",
+   "value": 22.95,
+   "unit": "clock_h"
+  },
+  {
+   "metric": "wake_time",
+   "day": "2026-10-10",
+   "value": 8.56,
+   "unit": "clock_h"
+  },
+  {
+   "metric": "hrv_night_ms",
+   "day": "2026-10-10",
+   "value": 53,
+   "unit": "ms"
+  },
+  {
+   "metric": "hrv_week_ms",
+   "day": "2026-10-10",
+   "value": 62,
+   "unit": "ms"
+  },
+  {
+   "metric": "rhr",
+   "day": "2026-10-10",
+   "value": 52,
+   "unit": "bpm"
+  },
+  {
+   "metric": "steps",
+   "day": "2026-10-10",
+   "value": 10533,
+   "unit": "steps"
+  },
+  {
+   "metric": "bb_wake",
+   "day": "2026-10-10",
+   "value": 57,
+   "unit": "bb"
+  },
+  {
+   "metric": "bb_high",
+   "day": "2026-10-10",
+   "value": 70,
+   "unit": "bb"
+  },
+  {
+   "metric": "bb_low",
+   "day": "2026-10-10",
+   "value": 18,
+   "unit": "bb"
+  },
+  {
+   "metric": "intensity_min",
+   "day": "2026-10-10",
+   "value": 108,
+   "unit": "min"
+  },
+  {
+   "metric": "readiness",
+   "day": "2026-10-10",
+   "value": 43,
+   "unit": "score"
+  },
+  {
+   "metric": "vo2max",
+   "day": "2026-10-10",
+   "value": 54.4,
+   "unit": "ml/kg/min"
+  },
+  {
+   "metric": "sleep_h",
+   "day": "2026-10-11",
+   "value": 7.37,
+   "unit": "h"
+  },
+  {
+   "metric": "sleep_deep_h",
+   "day": "2026-10-11",
+   "value": 1.1,
+   "unit": "h"
+  },
+  {
+   "metric": "sleep_rem_h",
+   "day": "2026-10-11",
+   "value": 1.88,
+   "unit": "h"
+  },
+  {
+   "metric": "sleep_awake_min",
+   "day": "2026-10-11",
+   "value": 17,
+   "unit": "min"
+  },
+  {
+   "metric": "sleep_score",
+   "day": "2026-10-11",
+   "value": 73,
+   "unit": "score"
+  },
+  {
+   "metric": "bed_time",
+   "day": "2026-10-11",
+   "value": 0.47,
+   "unit": "clock_h"
+  },
+  {
+   "metric": "wake_time",
+   "day": "2026-10-11",
+   "value": 7.71,
+   "unit": "clock_h"
+  },
+  {
+   "metric": "hrv_night_ms",
+   "day": "2026-10-11",
+   "value": 56,
+   "unit": "ms"
+  },
+  {
+   "metric": "hrv_week_ms",
+   "day": "2026-10-11",
+   "value": 65,
+   "unit": "ms"
+  },
+  {
+   "metric": "rhr",
+   "day": "2026-10-11",
+   "value": 48,
+   "unit": "bpm"
+  },
+  {
+   "metric": "steps",
+   "day": "2026-10-11",
+   "value": 6685,
+   "unit": "steps"
+  },
+  {
+   "metric": "bb_wake",
+   "day": "2026-10-11",
+   "value": 74,
+   "unit": "bb"
+  },
+  {
+   "metric": "bb_high",
+   "day": "2026-10-11",
+   "value": 81,
+   "unit": "bb"
+  },
+  {
+   "metric": "bb_low",
+   "day": "2026-10-11",
+   "value": 33,
+   "unit": "bb"
+  },
+  {
+   "metric": "intensity_min",
+   "day": "2026-10-11",
+   "value": 120,
+   "unit": "min"
+  },
+  {
+   "metric": "readiness",
+   "day": "2026-10-11",
+   "value": 37,
+   "unit": "score"
+  },
+  {
+   "metric": "vo2max",
+   "day": "2026-10-11",
+   "value": 54.5,
+   "unit": "ml/kg/min"
+  },
+  {
+   "metric": "sleep_h",
+   "day": "2026-10-12",
+   "value": 6.39,
+   "unit": "h"
+  },
+  {
+   "metric": "sleep_deep_h",
+   "day": "2026-10-12",
+   "value": 1.02,
+   "unit": "h"
+  },
+  {
+   "metric": "sleep_rem_h",
+   "day": "2026-10-12",
+   "value": 1.2,
+   "unit": "h"
+  },
+  {
+   "metric": "sleep_awake_min",
+   "day": "2026-10-12",
+   "value": 43,
+   "unit": "min"
+  },
+  {
+   "metric": "sleep_score",
+   "day": "2026-10-12",
+   "value": 68,
+   "unit": "score"
+  },
+  {
+   "metric": "bed_time",
+   "day": "2026-10-12",
+   "value": 23.36,
+   "unit": "clock_h"
+  },
+  {
+   "metric": "wake_time",
+   "day": "2026-10-12",
+   "value": 7.81,
+   "unit": "clock_h"
+  },
+  {
+   "metric": "hrv_night_ms",
+   "day": "2026-10-12",
+   "value": 56,
+   "unit": "ms"
+  },
+  {
+   "metric": "hrv_week_ms",
+   "day": "2026-10-12",
+   "value": 63,
+   "unit": "ms"
+  },
+  {
+   "metric": "rhr",
+   "day": "2026-10-12",
+   "value": 48,
+   "unit": "bpm"
+  },
+  {
+   "metric": "steps",
+   "day": "2026-10-12",
+   "value": 8900,
+   "unit": "steps"
+  },
+  {
+   "metric": "bb_wake",
+   "day": "2026-10-12",
+   "value": 81,
+   "unit": "bb"
+  },
+  {
+   "metric": "bb_high",
+   "day": "2026-10-12",
+   "value": 70,
+   "unit": "bb"
+  },
+  {
+   "metric": "bb_low",
+   "day": "2026-10-12",
+   "value": 13,
+   "unit": "bb"
+  },
+  {
+   "metric": "intensity_min",
+   "day": "2026-10-12",
+   "value": 104,
+   "unit": "min"
+  },
+  {
+   "metric": "readiness",
+   "day": "2026-10-12",
+   "value": 56,
+   "unit": "score"
+  },
+  {
+   "metric": "vo2max",
+   "day": "2026-10-12",
+   "value": 54.5,
+   "unit": "ml/kg/min"
+  },
+  {
+   "metric": "sleep_h",
+   "day": "2026-10-13",
+   "value": 6.95,
+   "unit": "h"
+  },
+  {
+   "metric": "sleep_deep_h",
+   "day": "2026-10-13",
+   "value": 1.35,
+   "unit": "h"
+  },
+  {
+   "metric": "sleep_rem_h",
+   "day": "2026-10-13",
+   "value": 1.66,
+   "unit": "h"
+  },
+  {
+   "metric": "sleep_awake_min",
+   "day": "2026-10-13",
+   "value": 23,
+   "unit": "min"
+  },
+  {
+   "metric": "sleep_score",
+   "day": "2026-10-13",
+   "value": 65,
+   "unit": "score"
+  },
+  {
+   "metric": "bed_time",
+   "day": "2026-10-13",
+   "value": 0.35,
+   "unit": "clock_h"
+  },
+  {
+   "metric": "wake_time",
+   "day": "2026-10-13",
+   "value": 6.48,
+   "unit": "clock_h"
+  },
+  {
+   "metric": "hrv_night_ms",
+   "day": "2026-10-13",
+   "value": 53,
+   "unit": "ms"
+  },
+  {
+   "metric": "hrv_week_ms",
+   "day": "2026-10-13",
+   "value": 65,
+   "unit": "ms"
+  },
+  {
+   "metric": "rhr",
+   "day": "2026-10-13",
+   "value": 49,
+   "unit": "bpm"
+  },
+  {
+   "metric": "steps",
+   "day": "2026-10-13",
+   "value": 9269,
+   "unit": "steps"
+  },
+  {
+   "metric": "bb_wake",
+   "day": "2026-10-13",
+   "value": 84,
+   "unit": "bb"
+  },
+  {
+   "metric": "bb_high",
+   "day": "2026-10-13",
+   "value": 81,
+   "unit": "bb"
+  },
+  {
+   "metric": "bb_low",
+   "day": "2026-10-13",
+   "value": 17,
+   "unit": "bb"
+  },
+  {
+   "metric": "intensity_min",
+   "day": "2026-10-13",
+   "value": 115,
+   "unit": "min"
+  },
+  {
+   "metric": "readiness",
+   "day": "2026-10-13",
+   "value": 85,
+   "unit": "score"
+  },
+  {
+   "metric": "vo2max",
+   "day": "2026-10-13",
+   "value": 54.6,
+   "unit": "ml/kg/min"
+  },
+  {
+   "metric": "sleep_h",
+   "day": "2026-10-14",
+   "value": 8.22,
+   "unit": "h"
+  },
+  {
+   "metric": "sleep_deep_h",
+   "day": "2026-10-14",
+   "value": 1.79,
+   "unit": "h"
+  },
+  {
+   "metric": "sleep_rem_h",
+   "day": "2026-10-14",
+   "value": 1.66,
+   "unit": "h"
+  },
+  {
+   "metric": "sleep_awake_min",
+   "day": "2026-10-14",
+   "value": 40,
+   "unit": "min"
+  },
+  {
+   "metric": "sleep_score",
+   "day": "2026-10-14",
+   "value": 80,
+   "unit": "score"
+  },
+  {
+   "metric": "bed_time",
+   "day": "2026-10-14",
+   "value": 0.85,
+   "unit": "clock_h"
+  },
+  {
+   "metric": "wake_time",
+   "day": "2026-10-14",
+   "value": 7.59,
+   "unit": "clock_h"
+  },
+  {
+   "metric": "hrv_night_ms",
+   "day": "2026-10-14",
+   "value": 52,
+   "unit": "ms"
+  },
+  {
+   "metric": "hrv_week_ms",
+   "day": "2026-10-14",
+   "value": 62,
+   "unit": "ms"
+  },
+  {
+   "metric": "rhr",
+   "day": "2026-10-14",
+   "value": 50,
+   "unit": "bpm"
+  },
+  {
+   "metric": "steps",
+   "day": "2026-10-14",
+   "value": 8925,
+   "unit": "steps"
+  },
+  {
+   "metric": "bb_wake",
+   "day": "2026-10-14",
+   "value": 92,
+   "unit": "bb"
+  },
+  {
+   "metric": "bb_high",
+   "day": "2026-10-14",
+   "value": 100,
+   "unit": "bb"
+  },
+  {
+   "metric": "bb_low",
+   "day": "2026-10-14",
+   "value": 16,
+   "unit": "bb"
+  },
+  {
+   "metric": "intensity_min",
+   "day": "2026-10-14",
+   "value": 14,
+   "unit": "min"
+  },
+  {
+   "metric": "readiness",
+   "day": "2026-10-14",
+   "value": 41,
+   "unit": "score"
+  },
+  {
+   "metric": "vo2max",
+   "day": "2026-10-14",
+   "value": 54.5,
+   "unit": "ml/kg/min"
+  },
+  {
+   "metric": "sleep_h",
+   "day": "2026-10-15",
+   "value": 6.77,
+   "unit": "h"
+  },
+  {
+   "metric": "sleep_deep_h",
+   "day": "2026-10-15",
+   "value": 1.37,
+   "unit": "h"
+  },
+  {
+   "metric": "sleep_rem_h",
+   "day": "2026-10-15",
+   "value": 1.45,
+   "unit": "h"
+  },
+  {
+   "metric": "sleep_awake_min",
+   "day": "2026-10-15",
+   "value": 40,
+   "unit": "min"
+  },
+  {
+   "metric": "sleep_score",
+   "day": "2026-10-15",
+   "value": 61,
+   "unit": "score"
+  },
+  {
+   "metric": "bed_time",
+   "day": "2026-10-15",
+   "value": 0.64,
+   "unit": "clock_h"
+  },
+  {
+   "metric": "wake_time",
+   "day": "2026-10-15",
+   "value": 6.69,
+   "unit": "clock_h"
+  },
+  {
+   "metric": "hrv_night_ms",
+   "day": "2026-10-15",
+   "value": 53,
+   "unit": "ms"
+  },
+  {
+   "metric": "hrv_week_ms",
+   "day": "2026-10-15",
+   "value": 65,
+   "unit": "ms"
+  },
+  {
+   "metric": "rhr",
+   "day": "2026-10-15",
+   "value": 46,
+   "unit": "bpm"
+  },
+  {
+   "metric": "steps",
+   "day": "2026-10-15",
+   "value": 14518,
+   "unit": "steps"
+  },
+  {
+   "metric": "bb_wake",
+   "day": "2026-10-15",
+   "value": 89,
+   "unit": "bb"
+  },
+  {
+   "metric": "bb_high",
+   "day": "2026-10-15",
+   "value": 91,
+   "unit": "bb"
+  },
+  {
+   "metric": "bb_low",
+   "day": "2026-10-15",
+   "value": 31,
+   "unit": "bb"
+  },
+  {
+   "metric": "intensity_min",
+   "day": "2026-10-15",
+   "value": 104,
+   "unit": "min"
+  },
+  {
+   "metric": "readiness",
+   "day": "2026-10-15",
+   "value": 82,
+   "unit": "score"
+  },
+  {
+   "metric": "vo2max",
+   "day": "2026-10-15",
+   "value": 54.5,
+   "unit": "ml/kg/min"
+  },
+  {
+   "metric": "sleep_h",
+   "day": "2026-10-16",
+   "value": 7.54,
+   "unit": "h"
+  },
+  {
+   "metric": "sleep_deep_h",
+   "day": "2026-10-16",
+   "value": 1.46,
+   "unit": "h"
+  },
+  {
+   "metric": "sleep_rem_h",
+   "day": "2026-10-16",
+   "value": 1.43,
+   "unit": "h"
+  },
+  {
+   "metric": "sleep_awake_min",
+   "day": "2026-10-16",
+   "value": 27,
+   "unit": "min"
+  },
+  {
+   "metric": "sleep_score",
+   "day": "2026-10-16",
+   "value": 74,
+   "unit": "score"
+  },
+  {
+   "metric": "bed_time",
+   "day": "2026-10-16",
+   "value": 0.03,
+   "unit": "clock_h"
+  },
+  {
+   "metric": "wake_time",
+   "day": "2026-10-16",
+   "value": 7.05,
+   "unit": "clock_h"
+  },
+  {
+   "metric": "hrv_night_ms",
+   "day": "2026-10-16",
+   "value": 74,
+   "unit": "ms"
+  },
+  {
+   "metric": "hrv_week_ms",
+   "day": "2026-10-16",
+   "value": 64,
+   "unit": "ms"
+  },
+  {
+   "metric": "rhr",
+   "day": "2026-10-16",
+   "value": 54,
+   "unit": "bpm"
+  },
+  {
+   "metric": "steps",
+   "day": "2026-10-16",
+   "value": 8085,
+   "unit": "steps"
+  },
+  {
+   "metric": "bb_wake",
+   "day": "2026-10-16",
+   "value": 67,
+   "unit": "bb"
+  },
+  {
+   "metric": "bb_high",
+   "day": "2026-10-16",
+   "value": 83,
+   "unit": "bb"
+  },
+  {
+   "metric": "bb_low",
+   "day": "2026-10-16",
+   "value": 29,
+   "unit": "bb"
+  },
+  {
+   "metric": "intensity_min",
+   "day": "2026-10-16",
+   "value": 58,
+   "unit": "min"
+  },
+  {
+   "metric": "readiness",
+   "day": "2026-10-16",
+   "value": 78,
+   "unit": "score"
+  },
+  {
+   "metric": "vo2max",
+   "day": "2026-10-16",
+   "value": 54.6,
+   "unit": "ml/kg/min"
+  },
+  {
+   "metric": "sleep_h",
+   "day": "2026-10-17",
+   "value": 6.29,
+   "unit": "h"
+  },
+  {
+   "metric": "sleep_deep_h",
+   "day": "2026-10-17",
+   "value": 1.17,
+   "unit": "h"
+  },
+  {
+   "metric": "sleep_rem_h",
+   "day": "2026-10-17",
+   "value": 1.34,
+   "unit": "h"
+  },
+  {
+   "metric": "sleep_awake_min",
+   "day": "2026-10-17",
+   "value": 8,
+   "unit": "min"
+  },
+  {
+   "metric": "sleep_score",
+   "day": "2026-10-17",
+   "value": 59,
+   "unit": "score"
+  },
+  {
+   "metric": "bed_time",
+   "day": "2026-10-17",
+   "value": 22.85,
+   "unit": "clock_h"
+  },
+  {
+   "metric": "wake_time",
+   "day": "2026-10-17",
+   "value": 8.24,
+   "unit": "clock_h"
+  },
+  {
+   "metric": "hrv_night_ms",
+   "day": "2026-10-17",
+   "value": 71,
+   "unit": "ms"
+  },
+  {
+   "metric": "hrv_week_ms",
+   "day": "2026-10-17",
+   "value": 64,
+   "unit": "ms"
+  },
+  {
+   "metric": "rhr",
+   "day": "2026-10-17",
+   "value": 53,
+   "unit": "bpm"
+  },
+  {
+   "metric": "steps",
+   "day": "2026-10-17",
+   "value": 13238,
+   "unit": "steps"
+  },
+  {
+   "metric": "bb_wake",
+   "day": "2026-10-17",
+   "value": 83,
+   "unit": "bb"
+  },
+  {
+   "metric": "bb_high",
+   "day": "2026-10-17",
+   "value": 91,
+   "unit": "bb"
+  },
+  {
+   "metric": "bb_low",
+   "day": "2026-10-17",
+   "value": 14,
+   "unit": "bb"
+  },
+  {
+   "metric": "intensity_min",
+   "day": "2026-10-17",
+   "value": 75,
+   "unit": "min"
+  },
+  {
+   "metric": "readiness",
+   "day": "2026-10-17",
+   "value": 65,
+   "unit": "score"
+  },
+  {
+   "metric": "vo2max",
+   "day": "2026-10-17",
+   "value": 54.6,
+   "unit": "ml/kg/min"
+  },
+  {
+   "metric": "sleep_h",
+   "day": "2026-10-18",
+   "value": 7.24,
+   "unit": "h"
+  },
+  {
+   "metric": "sleep_deep_h",
+   "day": "2026-10-18",
+   "value": 1.38,
+   "unit": "h"
+  },
+  {
+   "metric": "sleep_rem_h",
+   "day": "2026-10-18",
+   "value": 1.5,
+   "unit": "h"
+  },
+  {
+   "metric": "sleep_awake_min",
+   "day": "2026-10-18",
+   "value": 23,
+   "unit": "min"
+  },
+  {
+   "metric": "sleep_score",
+   "day": "2026-10-18",
+   "value": 74,
+   "unit": "score"
+  },
+  {
+   "metric": "bed_time",
+   "day": "2026-10-18",
+   "value": 22.88,
+   "unit": "clock_h"
+  },
+  {
+   "metric": "wake_time",
+   "day": "2026-10-18",
+   "value": 6.72,
+   "unit": "clock_h"
+  },
+  {
+   "metric": "hrv_night_ms",
+   "day": "2026-10-18",
+   "value": 52,
+   "unit": "ms"
+  },
+  {
+   "metric": "hrv_week_ms",
+   "day": "2026-10-18",
+   "value": 62,
+   "unit": "ms"
+  },
+  {
+   "metric": "rhr",
+   "day": "2026-10-18",
+   "value": 49,
+   "unit": "bpm"
+  },
+  {
+   "metric": "steps",
+   "day": "2026-10-18",
+   "value": 13784,
+   "unit": "steps"
+  },
+  {
+   "metric": "bb_wake",
+   "day": "2026-10-18",
+   "value": 94,
+   "unit": "bb"
+  },
+  {
+   "metric": "bb_high",
+   "day": "2026-10-18",
+   "value": 97,
+   "unit": "bb"
+  },
+  {
+   "metric": "bb_low",
+   "day": "2026-10-18",
+   "value": 32,
+   "unit": "bb"
+  },
+  {
+   "metric": "intensity_min",
+   "day": "2026-10-18",
+   "value": 19,
+   "unit": "min"
+  },
+  {
+   "metric": "readiness",
+   "day": "2026-10-18",
+   "value": 64,
+   "unit": "score"
+  },
+  {
+   "metric": "vo2max",
+   "day": "2026-10-18",
+   "value": 54.5,
+   "unit": "ml/kg/min"
+  },
+  {
+   "metric": "sleep_h",
+   "day": "2026-10-19",
+   "value": 7.56,
+   "unit": "h"
+  },
+  {
+   "metric": "sleep_deep_h",
+   "day": "2026-10-19",
+   "value": 1.18,
+   "unit": "h"
+  },
+  {
+   "metric": "sleep_rem_h",
+   "day": "2026-10-19",
+   "value": 1.78,
+   "unit": "h"
+  },
+  {
+   "metric": "sleep_awake_min",
+   "day": "2026-10-19",
+   "value": 39,
+   "unit": "min"
+  },
+  {
+   "metric": "sleep_score",
+   "day": "2026-10-19",
+   "value": 73,
+   "unit": "score"
+  },
+  {
+   "metric": "bed_time",
+   "day": "2026-10-19",
+   "value": 22.68,
+   "unit": "clock_h"
+  },
+  {
+   "metric": "wake_time",
+   "day": "2026-10-19",
+   "value": 7.99,
+   "unit": "clock_h"
+  },
+  {
+   "metric": "hrv_night_ms",
+   "day": "2026-10-19",
+   "value": 76,
+   "unit": "ms"
+  },
+  {
+   "metric": "hrv_week_ms",
+   "day": "2026-10-19",
+   "value": 62,
+   "unit": "ms"
+  },
+  {
+   "metric": "rhr",
+   "day": "2026-10-19",
+   "value": 52,
+   "unit": "bpm"
+  },
+  {
+   "metric": "steps",
+   "day": "2026-10-19",
+   "value": 9585,
+   "unit": "steps"
+  },
+  {
+   "metric": "bb_wake",
+   "day": "2026-10-19",
+   "value": 66,
+   "unit": "bb"
+  },
+  {
+   "metric": "bb_high",
+   "day": "2026-10-19",
+   "value": 95,
+   "unit": "bb"
+  },
+  {
+   "metric": "bb_low",
+   "day": "2026-10-19",
+   "value": 30,
+   "unit": "bb"
+  },
+  {
+   "metric": "intensity_min",
+   "day": "2026-10-19",
+   "value": 76,
+   "unit": "min"
+  },
+  {
+   "metric": "readiness",
+   "day": "2026-10-19",
+   "value": 64,
+   "unit": "score"
+  },
+  {
+   "metric": "vo2max",
+   "day": "2026-10-19",
+   "value": 54.4,
+   "unit": "ml/kg/min"
+  }
+ ],
+ "activities": [
+  {
+   "id": "sample:2026-09-22-run",
+   "start": "2026-09-22T17:30:00",
+   "type": "running",
+   "name": "Sample run",
+   "distance_m": 7891,
+   "duration_s": 2550,
+   "elev_gain_m": 199,
+   "avg_hr": 146,
+   "max_hr": 173
+  },
+  {
+   "id": "sample:2026-09-24-run",
+   "start": "2026-09-24T17:30:00",
+   "type": "running",
+   "name": "Sample run",
+   "distance_m": 6797,
+   "duration_s": 2009,
+   "elev_gain_m": 79,
+   "avg_hr": 151,
+   "max_hr": 163
+  },
+  {
+   "id": "sample:2026-09-26-run",
+   "start": "2026-09-26T17:30:00",
+   "type": "running",
+   "name": "Sample run",
+   "distance_m": 18622,
+   "duration_s": 5554,
+   "elev_gain_m": 55,
+   "avg_hr": 141,
+   "max_hr": 177
+  },
+  {
+   "id": "sample:2026-09-29-run",
+   "start": "2026-09-29T17:30:00",
+   "type": "running",
+   "name": "Sample run",
+   "distance_m": 8765,
+   "duration_s": 2762,
+   "elev_gain_m": 20,
+   "avg_hr": 147,
+   "max_hr": 170
+  },
+  {
+   "id": "sample:2026-10-01-run",
+   "start": "2026-10-01T17:30:00",
+   "type": "running",
+   "name": "Sample run",
+   "distance_m": 5890,
+   "duration_s": 1726,
+   "elev_gain_m": 161,
+   "avg_hr": 141,
+   "max_hr": 178
+  },
+  {
+   "id": "sample:2026-10-03-run",
+   "start": "2026-10-03T17:30:00",
+   "type": "running",
+   "name": "Sample run",
+   "distance_m": 19172,
+   "duration_s": 6267,
+   "elev_gain_m": 47,
+   "avg_hr": 141,
+   "max_hr": 166
+  },
+  {
+   "id": "sample:2026-10-06-run",
+   "start": "2026-10-06T17:30:00",
+   "type": "running",
+   "name": "Sample run",
+   "distance_m": 5908,
+   "duration_s": 1743,
+   "elev_gain_m": 80,
+   "avg_hr": 144,
+   "max_hr": 163
+  },
+  {
+   "id": "sample:2026-10-08-run",
+   "start": "2026-10-08T17:30:00",
+   "type": "running",
+   "name": "Sample run",
+   "distance_m": 6616,
+   "duration_s": 2014,
+   "elev_gain_m": 132,
+   "avg_hr": 151,
+   "max_hr": 177
+  },
+  {
+   "id": "sample:2026-10-10-run",
+   "start": "2026-10-10T17:30:00",
+   "type": "running",
+   "name": "Sample run",
+   "distance_m": 16170,
+   "duration_s": 5244,
+   "elev_gain_m": 161,
+   "avg_hr": 149,
+   "max_hr": 173
+  },
+  {
+   "id": "sample:2026-10-11-hike",
+   "start": "2026-10-11T05:10:00",
+   "type": "hiking",
+   "name": "Sample 14er",
+   "distance_m": 12900,
+   "duration_s": 19800,
+   "elev_gain_m": 1100,
+   "avg_hr": 128,
+   "max_hr": 165
+  },
+  {
+   "id": "sample:2026-10-13-run",
+   "start": "2026-10-13T17:30:00",
+   "type": "running",
+   "name": "Sample run",
+   "distance_m": 6530,
+   "duration_s": 2094,
+   "elev_gain_m": 122,
+   "avg_hr": 143,
+   "max_hr": 168
+  },
+  {
+   "id": "sample:2026-10-15-run",
+   "start": "2026-10-15T17:30:00",
+   "type": "running",
+   "name": "Sample run",
+   "distance_m": 7098,
+   "duration_s": 2095,
+   "elev_gain_m": 190,
+   "avg_hr": 152,
+   "max_hr": 170
+  },
+  {
+   "id": "sample:2026-10-17-run",
+   "start": "2026-10-17T17:30:00",
+   "type": "running",
+   "name": "Sample run",
+   "distance_m": 20663,
+   "duration_s": 6696,
+   "elev_gain_m": 188,
+   "avg_hr": 139,
+   "max_hr": 169
+  },
+  {
+   "id": "sample:2026-10-18-hike",
+   "start": "2026-10-18T05:10:00",
+   "type": "hiking",
+   "name": "Sample 14er",
+   "distance_m": 12900,
+   "duration_s": 19800,
+   "elev_gain_m": 1100,
+   "avg_hr": 128,
+   "max_hr": 165
+  }
+ ]
+}

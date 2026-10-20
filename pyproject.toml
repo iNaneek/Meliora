@@ -8,12 +8,15 @@ authors = [
 ]
 requires-python = ">=3.12"
 dependencies = [
+    "garminconnect>=0.3.19",
+    "keyring>=25.7.0",
     "pywebview>=6.2.1",
 ]
 
 [project.scripts]
 meliora = "meliora:main"
 meliora-weather = "meliora.weather:main"
+meliora-garmin = "meliora.garmin:main"
 
 [build-system]
 requires = ["uv_build>=0.13.2,<0.14.0"]

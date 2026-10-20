@@ -8,7 +8,7 @@ from pathlib import Path
 
 import webview
 
-from meliora import config, db, rules, weather
+from meliora import config, db, garmin, rules, weather
 
 UI = Path(__file__).parent / "ui" / "index.html"
 
@@ -37,7 +37,21 @@ class Api:
 
     def sources(self) -> dict:
         return {"weather": weather.last_synced(), "weather_busy": _weather_busy.is_set(),
-                "today": weather.today_line()}
+                "today": weather.today_line(), "garmin": garmin.status()}
+
+    def garmin_sync(self) -> dict:
+        """The Sync button. pywebview runs js_api calls off the UI thread, so blocking is fine."""
+        try:
+            r = garmin.manual_pull()
+            return {"ok": True, "msg": ("Garmin synced." if r["sleep_ok"] else
+                    "Garmin synced, but last night's sleep isn't there yet. Open Garmin Connect on your phone.")}
+        except garmin.NotConnected:
+            return {"ok": False, "msg": "Garmin isn't connected. Run `uv run meliora-garmin login` in Terminal."}
+        except Exception as e:
+            logging.exception("garmin sync failed")
+            with db.session() as conn:
+                db.mark_sync(conn, garmin.SOURCE, False, str(e)[:200])
+            return {"ok": False, "msg": "Garmin sync failed. Using the last good copy."}
 
     def home(self) -> dict:
         h = config.home()
@@ -80,9 +94,33 @@ def _refresh_weather() -> None:
         _weather_busy.clear()
 
 
+def _garmin_auto(reason: str) -> None:
+    threading.Thread(target=garmin.auto_pull, args=(reason,), daemon=True).start()
+
+
+_wake_observer = None  # kept alive for the life of the app
+
+
+def _watch_wake() -> None:
+    """Run the Garmin auto pull when the Mac wakes. macOS tells us; nothing polls."""
+    global _wake_observer
+    try:
+        from AppKit import NSWorkspace, NSWorkspaceDidWakeNotification
+        from Foundation import NSOperationQueue
+
+        center = NSWorkspace.sharedWorkspace().notificationCenter()
+        _wake_observer = center.addObserverForName_object_queue_usingBlock_(
+            NSWorkspaceDidWakeNotification, None, NSOperationQueue.mainQueue(),
+            lambda _note: _garmin_auto("wake"))
+    except Exception:
+        logging.exception("couldn't watch for wake")
+
+
 def run() -> None:
     logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
     threading.Thread(target=_refresh_weather, daemon=True).start()
+    _garmin_auto("launch")
+    _watch_wake()
     _set_app_name("Meliora")
     webview.create_window(
         "Meliora",

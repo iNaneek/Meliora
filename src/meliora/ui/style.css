@@ -65,6 +65,9 @@ nav{display:flex;flex-direction:column;gap:2px}
 .src{display:flex;align-items:center;gap:6px}
 .src i{width:6px;height:6px;border-radius:50%;background:#5FC97F}
 .src.off i{background:#E2B04F}
+.src span{display:flex;align-items:center;gap:6px}
+.src .sync{margin-left:auto;border:1px solid var(--edge);background:var(--glass-2);border-radius:6px;padding:0 7px;font-size:10.5px;color:var(--muted)}
+.src .sync:disabled{opacity:.5;cursor:default}
 
 .top{display:flex;align-items:center;gap:10px;padding:0 10px 0 18px}
 .date b{font-size:14px;font-weight:600}
