@@ -41,10 +41,10 @@
       Meliora
     </div>
     <nav>
-      <a class="nav on">Today <b id="pendcount"></b></a>
+      <a class="nav on" data-view="today">Today <b id="pendcount"></b></a>
       <a class="nav">Week</a>
       <a class="nav">Semester</a>
-      <a class="nav">Body</a>
+      <a class="nav" data-view="body">Body</a>
       <a class="nav">Peaks</a>
       <a class="nav">Rest</a>
     </nav>
@@ -94,10 +94,43 @@
     </aside>
   </main>
 
+  <main class="bodyv" id="bodyv" hidden>
+    <div class="bv-head">
+      <div><h2>Body</h2><span class="bv-src" id="bv-src"></span></div>
+      <div class="seg" id="bv-range" role="group" aria-label="Date range">
+        <button data-days="30">30 days</button><button data-days="90" class="on">90 days</button>
+      </div>
+    </div>
+    <section class="tiles" id="tiles"></section>
+    <section class="cards">
+      <article class="card glass" data-chart="weeks">
+        <header><h3>Weekly distance</h3><span class="legend"><i class="sw s1"></i>Runs<i class="sw s2"></i>Hikes</span><button class="tbl">Table</button></header>
+        <div class="plot"></div>
+      </article>
+      <article class="card glass" data-chart="sleep">
+        <header><h3>Sleep per night</h3><button class="tbl">Table</button></header>
+        <div class="plot"></div>
+      </article>
+      <article class="card glass" data-chart="hrv">
+        <header><h3>HRV</h3><span class="legend"><i class="ln s1"></i>7-day avg<i class="dt m0"></i>Nightly</span><button class="tbl">Table</button></header>
+        <div class="plot"></div>
+      </article>
+      <article class="card glass" data-chart="rhr">
+        <header><h3>Resting heart rate</h3><button class="tbl">Table</button></header>
+        <div class="plot"></div>
+      </article>
+    </section>
+    <article class="card glass acts">
+      <header><h3>Recent activities</h3></header>
+      <div class="plot" id="acts"></div>
+    </article>
+  </main>
+
   <div class="toast" id="toast"></div>
 </div>
 
 <script src="sky.js"></script>
+<script src="charts.js"></script>
 <script src="app.js"></script>
 </body>
 </html>

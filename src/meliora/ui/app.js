@@ -87,7 +87,7 @@
   $('sync').onclick = function () {
     if (!api) return;
     var b = this; b.disabled = true; $('src-garmin').innerHTML = '<i></i>Garmin · syncing…';
-    api.garmin_sync().then(function (r) { b.disabled = false; toast(r.msg); renderSources(); });
+    api.garmin_sync().then(function (r) { b.disabled = false; toast(r.msg); renderSources(); if (!$('bodyv').hidden) loadBody(); });
   };
   $('reset').onclick = function () { api && api.reset().then(function (s) { render(s, true); toast('Demo reset.'); }); };
   document.querySelectorAll('[data-push]').forEach(function (b) {
@@ -129,6 +129,134 @@
       $('wx').textContent = [homeName, w && w.high_f + '° / ' + w.low_f + '°', w && w.sky, w && w.precip].filter(Boolean).join(' · ');
     });
   }
+
+  // ---------- Body view ----------
+  var bodyData = null, bodyDays = 90;
+  function num(v, dec) { return v == null ? '—' : (+v).toFixed(dec); }
+  function hm(h) { if (h == null) return '—'; var m = Math.round(h * 60); return Math.floor(m / 60) + 'h ' + (m % 60 < 10 ? '0' : '') + m % 60 + 'm'; }
+  function clockH(h) { if (h == null) return '—'; var hh = Math.floor(h), mm = Math.round((h - hh) * 60); return ((hh + 11) % 12 + 1) + ':' + (mm < 10 ? '0' : '') + mm + (hh < 12 ? ' am' : ' pm'); }
+  function dur(s) { if (!s) return '—'; var m = Math.round(s / 60); return m >= 60 ? Math.floor(m / 60) + 'h ' + (m % 60 < 10 ? '0' : '') + m % 60 + 'm' : m + 'm'; }
+  function pace(s) { return s ? Math.floor(s / 60) + ':' + (s % 60 < 10 ? '0' : '') + s % 60 + ' /mi' : '—'; }
+  function typeName(t) { return (t || '').replace(/_/g, ' ').replace(/^./, function (c) { return c.toUpperCase(); }); }
+
+  function setView(v) {
+    document.querySelector('.app').dataset.view = v;
+    $('bodyv').hidden = v !== 'body';
+    document.querySelectorAll('.nav[data-view]').forEach(function (n) { n.classList.toggle('on', n.dataset.view === v); });
+    Charts.hideTip();
+    if (v === 'body') loadBody();
+  }
+  document.querySelectorAll('.nav[data-view]').forEach(function (n) {
+    n.style.cursor = 'pointer';
+    n.onclick = function () { setView(n.dataset.view); };
+  });
+  document.querySelectorAll('#bv-range button').forEach(function (b) {
+    b.onclick = function () {
+      bodyDays = +b.dataset.days;
+      document.querySelectorAll('#bv-range button').forEach(function (o) { o.classList.toggle('on', o === b); });
+      loadBody();
+    };
+  });
+  document.querySelectorAll('.card .tbl').forEach(function (b) {
+    b.onclick = function () { b.classList.toggle('on'); renderCard(b.closest('.card')); };
+  });
+
+  function loadBody() {
+    if (!api) return;
+    $('bodyv').style.opacity = bodyData ? .6 : 1;  // keep the old render while refetching
+    api.body(bodyDays).then(function (d) { bodyData = d; $('bodyv').style.opacity = 1; renderBody(); });
+  }
+
+  function renderBody() {
+    var d = bodyData; if (!d) return;
+    if (d.empty) { $('bv-src').textContent = 'No Garmin data yet. Connect Garmin or run `uv run meliora-garmin sample`.'; return; }
+    $('bv-src').textContent = (d.source === 'sample' ? 'Sample data' : 'Garmin') + ' · ' +
+      Charts.shortDate(d.start) + ' – ' + Charts.shortDate(d.end);
+    $('tiles').innerHTML = d.tiles.map(function (t) {
+      var v = t.metric === 'sleep_h' ? hm(t.value) : num(t.value, t.dec);
+      var delta = '';
+      if (t.avg != null && t.n > 1) {
+        var diff = t.value - t.avg, sign = diff > 0 ? '+' : diff < 0 ? '−' : '±';
+        delta = sign + (t.metric === 'sleep_h' ? hm(Math.abs(diff)) : Math.abs(diff).toFixed(t.dec)) +
+          ' vs ' + d.days + '-day avg ' + (t.metric === 'sleep_h' ? hm(t.avg) : t.avg.toFixed(t.dec));
+      }
+      var stale = t.day !== d.end ? '<span class="asof">as of ' + esc(Charts.shortDate(t.day)) + '</span>' : '';
+      return '<div class="tile glass"><span class="lbl">' + esc(t.label) + '</span><span class="v">' + esc(v) +
+        (t.unit && t.metric !== 'sleep_h' ? '<small>' + esc(t.unit) + '</small>' : '') + '</span>' +
+        '<span class="d">' + esc(delta) + '</span>' + stale + Charts.spark(t.spark) + '</div>';
+    }).join('');
+    document.querySelectorAll('.card[data-chart]').forEach(renderCard);
+    Charts.table($('acts'), d.activities, [
+      { name: 'Date', get: function (a) { return Charts.shortDate(a.start.slice(0, 10)); } },
+      { name: 'Activity', get: function (a) { return a.name || ''; } },
+      { name: 'Type', get: function (a) { return typeName(a.type); } },
+      { name: 'Distance', get: function (a) { return a.mi ? a.mi.toFixed(1) + ' mi' : '—'; } },
+      { name: 'Time', get: function (a) { return dur(a.dur_s); } },
+      { name: 'Pace', get: function (a) { return pace(a.pace_s); } },
+      { name: 'Elev gain', get: function (a) { return a.elev_ft ? a.elev_ft.toLocaleString() + ' ft' : '—'; } },
+      { name: 'Avg HR', get: function (a) { return a.avg_hr ? Math.round(a.avg_hr) + '' : '—'; } }
+    ]);
+    if (!d.activities.length) $('acts').textContent = 'No activities in this range.';
+  }
+
+  function renderCard(card) {
+    var d = bodyData; if (!d || d.empty) return;
+    var host = card.querySelector('.plot'), asTable = card.querySelector('.tbl').classList.contains('on');
+    var kind = card.dataset.chart, daily = d.daily;
+    if (kind === 'weeks') {
+      var rows = d.weeks.map(function (w) {
+        return { label: Charts.shortDate(w.week), title: 'Week of ' + Charts.shortDate(w.week),
+          segs: { run: w.run_mi, hike: w.hike_mi },
+          extra: [{ value: w.runs + ' runs, ' + w.hikes + ' hikes', name: '' }] };
+      });
+      if (asTable) return Charts.table(host, d.weeks.slice().reverse(), [
+        { name: 'Week of', get: function (w) { return Charts.shortDate(w.week); } },
+        { name: 'Run mi', get: function (w) { return w.run_mi.toFixed(1); } },
+        { name: 'Hike mi', get: function (w) { return w.hike_mi.toFixed(1); } },
+        { name: 'Runs', get: function (w) { return w.runs; } },
+        { name: 'Hikes', get: function (w) { return w.hikes; } }]);
+      return Charts.columns(host, rows, [{ key: 'run', name: 'Runs', cls: 's1' }, { key: 'hike', name: 'Hikes', cls: 's2' }],
+        { fmt: function (v) { return v.toFixed(1) + ' mi'; }, minMax: 10 });
+    }
+    var withKey = function (k) { return daily.filter(function (p) { return p[k] != null; }); };
+    if (kind === 'sleep') {
+      if (asTable) return Charts.table(host, withKey('sleep_h').reverse(), [
+        { name: 'Night ending', get: function (p) { return Charts.shortDate(p.day); } },
+        { name: 'Sleep', get: function (p) { return hm(p.sleep_h); } },
+        { name: 'Score', get: function (p) { return num(p.sleep_score, 0); } },
+        { name: 'Bed', get: function (p) { return clockH(p.bed_time); } },
+        { name: 'Wake', get: function (p) { return clockH(p.wake_time); } },
+        { name: 'Deep', get: function (p) { return hm(p.sleep_deep_h); } },
+        { name: 'REM', get: function (p) { return hm(p.sleep_rem_h); } }]);
+      return Charts.lines(host, withKey('sleep_h'), [{ key: 'sleep_h', name: 'asleep', cls: 's1' }],
+        { start: d.start, end: d.end, zero: true, ref: 8, refLabel: '8h', fmt: hm,
+          tick: function (v) { return v + 'h'; },
+          extra: function (p) { return [{ value: num(p.sleep_score, 0), name: 'score' },
+            { value: clockH(p.bed_time) + ' → ' + clockH(p.wake_time), name: '' }]; } });
+    }
+    if (kind === 'hrv') {
+      if (asTable) return Charts.table(host, withKey('hrv_night_ms').reverse(), [
+        { name: 'Night ending', get: function (p) { return Charts.shortDate(p.day); } },
+        { name: 'Nightly ms', get: function (p) { return num(p.hrv_night_ms, 0); } },
+        { name: '7-day avg ms', get: function (p) { return num(p.hrv_week_ms, 0); } }]);
+      return Charts.lines(host, withKey('hrv_night_ms'), [
+        { key: 'hrv_night_ms', name: 'nightly', cls: 'm0', kind: 'dots' },
+        { key: 'hrv_week_ms', name: '7-day avg', cls: 's1' }],
+        { start: d.start, end: d.end, fmt: function (v) { return Math.round(v) + ' ms'; } });
+    }
+    if (kind === 'rhr') {
+      if (asTable) return Charts.table(host, withKey('rhr').reverse(), [
+        { name: 'Day', get: function (p) { return Charts.shortDate(p.day); } },
+        { name: 'Resting HR', get: function (p) { return num(p.rhr, 0) + ' bpm'; } }]);
+      return Charts.lines(host, withKey('rhr'), [{ key: 'rhr', name: 'resting', cls: 's1' }],
+        { start: d.start, end: d.end, fmt: function (v) { return Math.round(v) + ' bpm'; } });
+    }
+  }
+  var resizeT;
+  window.addEventListener('resize', function () {
+    clearTimeout(resizeT);
+    resizeT = setTimeout(function () { if (!$('bodyv').hidden) document.querySelectorAll('.card[data-chart]').forEach(renderCard); }, 150);
+  });
 
   // ---------- boot ----------
   Sky.scatterStars();

@@ -8,7 +8,7 @@ from pathlib import Path
 
 import webview
 
-from meliora import config, db, garmin, rules, weather
+from meliora import body, config, db, garmin, rules, weather
 
 UI = Path(__file__).parent / "ui" / "index.html"
 
@@ -52,6 +52,9 @@ class Api:
             with db.session() as conn:
                 db.mark_sync(conn, garmin.SOURCE, False, str(e)[:200])
             return {"ok": False, "msg": "Garmin sync failed. Using the last good copy."}
+
+    def body(self, days: int = 30) -> dict:
+        return body.body(int(days))
 
     def home(self) -> dict:
         h = config.home()
