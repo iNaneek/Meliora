@@ -63,6 +63,8 @@ def connected() -> bool:
 def login() -> None:
     from garminconnect import Garmin
 
+    # The library tries several login methods and logs each one that fails. Only the final result matters.
+    logging.getLogger("garminconnect").setLevel(logging.ERROR)
     email = input("Garmin email: ").strip()
     password = getpass.getpass("Garmin password (not saved): ")
     api = Garmin(email, password, prompt_mfa=lambda: input("MFA code: ").strip())
@@ -352,6 +354,15 @@ def main() -> None:
             print("Garmin tokens removed from Keychain.")
     except NotConnected as e:
         sys.exit(str(e))
+    except Exception as e:
+        from garminconnect import GarminConnectAuthenticationError, GarminConnectTooManyRequestsError
+
+        if isinstance(e, GarminConnectAuthenticationError):
+            sys.exit(f"Garmin rejected the login: {e}\n"
+                     "Check the email and password at connect.garmin.com first. Repeated failures can lock the account.")
+        if isinstance(e, GarminConnectTooManyRequestsError):
+            sys.exit("Garmin is rate-limiting right now. Wait 15–30 minutes and try again.")
+        raise
 
 
 if __name__ == "__main__":
