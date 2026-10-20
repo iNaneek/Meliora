@@ -1,0 +1,50 @@
+# Meliora settings: public sample with fake values.
+# To make it yours: mkdir -p data && cp data-sample/* data/   then edit data/config.toml.
+# The app reads data/<file> when it exists, otherwise data-sample/<file>. data/ is gitignored.
+
+[vault]
+# Obsidian vault. ~ is expanded. The app writes only inside <vault>/Assistant/.
+path = "~/Documents/Vault"
+
+[weather]
+# Open-Meteo models pulled for every place (free, no key). NWS covers the US only.
+models = ["ecmwf_ifs025", "ncep_nam_conus"]
+forecast_days = 14
+refresh_hours = 3          # the app refetches on launch if the cache is older than this
+nws_user_agent = "meliora-personal-assistant"
+
+# kind: home | peak | resort. Exactly one home: it drives the sky and the top-bar weather.
+# elev_m is what the forecast is downscaled to (summit for peaks, upper mountain for resorts).
+[[places]]
+id = "home"
+name = "Boulder"
+kind = "home"
+lat = 40.0150
+lon = -105.2705
+elev_m = 1655
+
+[[places]]
+id = "longs"
+name = "Longs Peak"
+kind = "peak"
+range = "Front"
+lat = 40.2550
+lon = -105.6151
+elev_m = 4346
+
+[[places]]
+id = "elbert"
+name = "Mount Elbert"
+kind = "peak"
+range = "Sawatch"
+lat = 39.1178
+lon = -106.4454
+elev_m = 4401
+
+[[places]]
+id = "eldora"
+name = "Eldora"
+kind = "resort"
+lat = 39.9372
+lon = -105.5827
+elev_m = 3050

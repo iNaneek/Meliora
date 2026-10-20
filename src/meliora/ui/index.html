@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="en" data-ink="dark">
+<head>
+<meta charset="utf-8">
+<title>Meliora</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- The sky: everything behind the glass. -->
+<div class="sky" id="sky" aria-hidden="true">
+  <!-- Stars and aurora animate whole layers (GPU-composited), never shapes inside an SVG. -->
+  <div class="stars" id="stars"></div>
+  <div class="aurora" id="aurora">
+    <svg width="0" height="0" style="position:absolute"><defs><filter id="soft" x="-20%" y="-50%" width="140%" height="200%"><feGaussianBlur stdDeviation="22"/></filter></defs></svg>
+    <svg class="rib r1" viewBox="0 0 1440 600" preserveAspectRatio="none"><path filter="url(#soft)" fill="none" stroke-linecap="round" d="M-60 230 C 200 120, 420 300, 700 190 S 1180 90, 1500 210" stroke="#3BE38B" stroke-width="70"/></svg>
+    <svg class="rib r2" viewBox="0 0 1440 600" preserveAspectRatio="none"><path filter="url(#soft)" fill="none" stroke-linecap="round" d="M-60 300 C 260 220, 520 360, 820 250 S 1240 180, 1500 280" stroke="#8A5CF6" stroke-width="60"/></svg>
+    <svg class="rib r3" viewBox="0 0 1440 600" preserveAspectRatio="none"><path filter="url(#soft)" fill="none" stroke-linecap="round" d="M-60 160 C 300 90, 600 220, 900 130 S 1300 60, 1500 140" stroke="#E05AA8" stroke-width="40"/></svg>
+  </div>
+  <div class="sun" id="sun"></div>
+  <div class="belt" id="belt"></div>
+  <div class="glow" id="glow"></div>
+  <svg class="ridge" viewBox="0 0 1440 300" preserveAspectRatio="xMidYMax slice">
+    <defs>
+      <linearGradient id="litGrad" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="#F2B39B" stop-opacity="1"/>
+        <stop offset=".45" stop-color="#F2B39B" stop-opacity=".35"/>
+        <stop offset=".8" stop-color="#F2B39B" stop-opacity="0"/>
+      </linearGradient>
+    </defs>
+    <path id="ridge-far" d="M0 300 L0 170 L80 150 L150 120 L210 140 L290 95 L350 118 L420 80 L470 102 L540 70 L600 96 L680 110 L740 78 L800 60 L850 88 L930 72 L1000 100 L1080 84 L1150 110 L1220 90 L1300 120 L1380 104 L1440 130 L1440 300 Z"/>
+    <path id="ridge-near" d="M0 300 L0 230 L90 205 L170 215 L250 170 L310 188 L380 140 L430 160 L500 120 L560 150 L620 165 L700 132 L760 150 L840 110 L900 70 L960 112 L1020 128 L1090 160 L1160 145 L1240 178 L1320 165 L1440 200 L1440 300 Z"/>
+    <path id="ridge-lit" fill="url(#litGrad)" d="M0 300 L0 230 L90 205 L170 215 L250 170 L310 188 L380 140 L430 160 L500 120 L560 150 L620 165 L700 132 L760 150 L840 110 L900 70 L960 112 L1020 128 L1090 160 L1160 145 L1240 178 L1320 165 L1440 200 L1440 300 Z"/>
+  </svg>
+</div>
+
+<div class="app">
+  <aside class="side glass">
+    <div class="brand">
+      <svg width="20" height="20" viewBox="0 0 20 20" aria-hidden="true"><path d="M3 17 L15 13 L5 9 L15 5 L9 2" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      Meliora
+    </div>
+    <nav>
+      <a class="nav on">Today <b id="pendcount"></b></a>
+      <a class="nav">Week</a>
+      <a class="nav">Semester</a>
+      <a class="nav">Body</a>
+      <a class="nav">Peaks</a>
+      <a class="nav">Rest</a>
+    </nav>
+    <div class="scrub">
+      <input type="range" id="slider" min="0" max="1439" step="1" aria-label="Time of day for the sky">
+      <button class="time" id="time" title="Back to the real time"></button>
+    </div>
+    <div class="why">Steve Jobs<em>"Stay hungry, stay foolish."</em></div>
+    <div class="sources">
+      <div class="src off"><i></i>Calendar · not connected</div>
+      <div class="src off"><i></i>Canvas · not connected</div>
+      <div class="src off" id="src-weather"><i></i>Weather · not synced yet</div>
+      <div class="src" id="bridge"><i></i>Python bridge</div>
+    </div>
+  </aside>
+
+  <header class="top glass">
+    <div class="date"><b id="date"></b><span id="wx"></span></div>
+    <div class="spacer"></div>
+    <div class="seg" role="group" aria-label="How hard it pushes">
+      <button data-push="quiet">Quiet</button><button data-push="normal" class="on">Normal</button><button data-push="push">Push</button>
+    </div>
+    <button class="btn ghost" id="reset" title="Clear today's Confirm/Decline choices">Reset demo</button>
+    <button class="btn primary" id="ask">Ask</button>
+  </header>
+
+  <main class="center">
+    <section class="hero">
+      <div class="eyebrow" id="phase"></div>
+      <h1 class="sentence" id="sentence">Loading…</h1>
+      <div class="because" id="because"></div>
+      <div class="next glass" id="next"></div>
+    </section>
+
+    <section class="agenda glass">
+      <div class="agenda-h"><h3>Today</h3><span class="tag-demo">demo day</span></div>
+      <div class="rows" id="rows"></div>
+    </section>
+
+    <aside class="drawer glass" id="drawer" aria-label="Ask">
+      <div class="dh"><b>Ask</b><button class="btn ghost" id="close">Close</button></div>
+      <div class="msgs" id="msgs">
+        <div class="m a">Ask about your day. The model isn't connected yet, but this goes through Python.</div>
+      </div>
+      <form class="compose" id="compose"><input id="q" placeholder="Ask about your day…" autocomplete="off"></form>
+    </aside>
+  </main>
+
+  <div class="toast" id="toast"></div>
+</div>
+
+<script src="sky.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

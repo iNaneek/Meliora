@@ -1,0 +1,113 @@
+{
+  "_note": "Fake sample day. Copy to data/demo_day.json and make it yours.",
+  "deadline": {
+    "name": "Physics PS 4",
+    "short": "PS 4",
+    "due": "Thu 11:59 pm",
+    "due_day": "Thursday",
+    "estimate_h": 3.0
+  },
+  "job": {
+    "target_h": 14,
+    "done_h": 7
+  },
+  "blocks": [
+    {
+      "id": "breakfast",
+      "start": 7.25,
+      "end": 7.75,
+      "kind": "prot",
+      "title": "Breakfast",
+      "sub": "protected"
+    },
+    {
+      "id": "statics",
+      "start": 8,
+      "end": 8.83,
+      "kind": "ink",
+      "title": "Statics",
+      "sub": "Room 101",
+      "where": "Room 101"
+    },
+    {
+      "id": "calc",
+      "start": 9,
+      "end": 9.83,
+      "kind": "ink",
+      "title": "Calculus III",
+      "sub": "Room 204",
+      "where": "Room 204"
+    },
+    {
+      "id": "ps1",
+      "start": 10,
+      "end": 12,
+      "kind": "pen",
+      "title": "Physics PS 4, part 1",
+      "sub": "2h of 3h",
+      "where": "library",
+      "deadline_hours": 2
+    },
+    {
+      "id": "lunch",
+      "start": 12,
+      "end": 12.67,
+      "kind": "prot",
+      "title": "Lunch",
+      "sub": "protected"
+    },
+    {
+      "id": "lab",
+      "start": 13,
+      "end": 14.83,
+      "kind": "ink",
+      "title": "Chemistry lab",
+      "sub": "Lab B",
+      "where": "Lab B"
+    },
+    {
+      "id": "job",
+      "start": 15.25,
+      "end": 17.25,
+      "kind": "pen",
+      "title": "Job · best window this week",
+      "sub": "brings you to 9 of 14 h",
+      "where": "desk"
+    },
+    {
+      "id": "run",
+      "start": 17.5,
+      "end": 18.17,
+      "kind": "ink",
+      "title": "Easy run 4 mi",
+      "sub": "River trail · The Call: EASY",
+      "where": "River trail"
+    },
+    {
+      "id": "dinner",
+      "start": 18.5,
+      "end": 19.17,
+      "kind": "prot",
+      "title": "Dinner",
+      "sub": "protected"
+    },
+    {
+      "id": "ps2",
+      "start": 19.5,
+      "end": 20.5,
+      "kind": "pen",
+      "title": "Physics PS 4, part 2",
+      "sub": "1h, finishes the estimate",
+      "where": "desk",
+      "deadline_hours": 1
+    },
+    {
+      "id": "rest",
+      "start": 20.75,
+      "end": 22.5,
+      "kind": "rest",
+      "title": "Rest window: games or a show",
+      "sub": "protected · I won't schedule over it"
+    }
+  ]
+}
