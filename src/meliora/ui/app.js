@@ -180,7 +180,10 @@
         delta = sign + (t.metric === 'sleep_h' ? hm(Math.abs(diff)) : Math.abs(diff).toFixed(t.dec)) +
           ' vs ' + d.days + '-day avg ' + (t.metric === 'sleep_h' ? hm(t.avg) : t.avg.toFixed(t.dec));
       }
-      var stale = t.day !== d.end ? '<span class="asof">as of ' + esc(Charts.shortDate(t.day)) + '</span>' : '';
+      // VO2 max only changes after a qualifying run, so an older date is normal, not stale.
+      var stale = t.day === d.end ? '' : t.metric === 'vo2max'
+        ? '<span class="d">from your ' + esc(Charts.shortDate(t.day)) + ' run</span>'
+        : '<span class="asof">as of ' + esc(Charts.shortDate(t.day)) + '</span>';
       return '<div class="tile glass"><span class="lbl">' + esc(t.label) + '</span><span class="v">' + esc(v) +
         (t.unit && t.metric !== 'sleep_h' ? '<small>' + esc(t.unit) + '</small>' : '') + '</span>' +
         '<span class="d">' + esc(delta) + '</span>' + stale + Charts.spark(t.spark) + '</div>';

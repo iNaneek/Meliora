@@ -167,9 +167,10 @@ def _last_activity_day(conn) -> date | None:
     return date.fromisoformat(row[0][:10]) if row[0] else None
 
 
-def pull(first_of_day: bool = False) -> dict:
+def pull(first_of_day: bool = False, today_vo2: bool = False) -> dict:
     """One pull. Today's sleep/HRV/summary/readiness, plus activities since the last one.
-    First pull of the day also finalizes yesterday (summary + VO2 max). Returns a report."""
+    First pull of the day also finalizes yesterday (summary + VO2 max). `today_vo2` also asks
+    for today's VO2 max, which Garmin only computes after a qualifying run (the Sync button)."""
     today = date.today()
     with _lock:
         api = _client()
@@ -181,6 +182,8 @@ def pull(first_of_day: bool = False) -> dict:
                 if first_of_day:
                     for ep in ("summary", "max_metrics"):
                         _fetch(api, conn, ep, today - timedelta(days=1))
+                if today_vo2:
+                    _fetch(api, conn, "max_metrics", today)
                 since = min(_last_activity_day(conn) or today, today - timedelta(days=1))
                 n_acts = save_activities(conn, api.get_activities_by_date(since.isoformat(), today.isoformat()))
             finally:
@@ -242,7 +245,7 @@ def manual_pull() -> dict:
     today = date.today().isoformat()
     with db.session() as conn:
         row = conn.execute("SELECT auto_count FROM garmin_pulls WHERE day = ?", (today,)).fetchone()
-    report = pull(first_of_day=not row or row[0] == 0)
+    report = pull(first_of_day=not row or row[0] == 0, today_vo2=True)
     with db.session() as conn:
         conn.execute(
             """INSERT INTO garmin_pulls (day, auto_count, last_try, sleep_ok) VALUES (?, 0, ?, ?)
