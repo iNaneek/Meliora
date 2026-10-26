@@ -114,6 +114,26 @@ CREATE TABLE IF NOT EXISTS source_sync (
     last_try TEXT,
     detail   TEXT
 );
+-- Every model call (local or Claude): what it was for, how long, how many tokens.
+CREATE TABLE IF NOT EXISTS llm_calls (
+    at         TEXT NOT NULL,
+    backend    TEXT NOT NULL,              -- ollama | claude
+    model      TEXT NOT NULL,
+    task       TEXT NOT NULL,              -- e.g. body_headline
+    ms         INTEGER,
+    tokens_in  INTEGER,
+    tokens_out INTEGER,
+    ok         INTEGER NOT NULL,
+    detail     TEXT
+);
+-- Generated text, cached by a fingerprint of the facts it was written from.
+CREATE TABLE IF NOT EXISTS summaries (
+    key         TEXT PRIMARY KEY,          -- e.g. body
+    fingerprint TEXT NOT NULL,
+    text        TEXT NOT NULL,
+    model       TEXT NOT NULL,
+    created_at  TEXT NOT NULL
+);
 """
 
 

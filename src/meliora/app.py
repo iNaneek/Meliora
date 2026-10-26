@@ -8,7 +8,7 @@ from pathlib import Path
 
 import webview
 
-from meliora import body, config, db, garmin, rules, weather
+from meliora import body, config, db, garmin, llm, overview, rules, weather
 
 UI = Path(__file__).parent / "ui" / "index.html"
 
@@ -55,6 +55,14 @@ class Api:
 
     def body(self, days: int = 30) -> dict:
         return body.body(int(days))
+
+    def body_overview(self) -> dict:
+        """Instant: the facts, plus the cached headline (or the plain one, marked pending)."""
+        return overview.overview()
+
+    def body_headline(self) -> dict:
+        """Slow (model call). The UI asks for this only when the overview says pending."""
+        return overview.headline()
 
     def home(self) -> dict:
         h = config.home()
@@ -125,7 +133,7 @@ def run() -> None:
     _garmin_auto("launch")
     _watch_wake()
     _set_app_name("Meliora")
-    webview.create_window(
+    window = webview.create_window(
         "Meliora",
         url=UI.as_uri(),
         js_api=Api(),
@@ -133,5 +141,6 @@ def run() -> None:
         height=880,
         min_size=(1100, 720),
     )
+    window.events.closed += llm.shutdown  # stop the Ollama server if Meliora started it
     # MELIORA_DEBUG=1 enables right-click → Inspect Element for live CSS tweaking.
     webview.start(debug=bool(os.environ.get("MELIORA_DEBUG")))

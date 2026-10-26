@@ -29,17 +29,22 @@ def _source(conn) -> str:
     return "garmin" if has_real else "sample"
 
 
+def find_anchor(conn) -> tuple[str, date] | None:
+    """(source, the day the view ends on). The sample is a fixed window, so it ends on its last day."""
+    src = _source(conn)
+    if src == "garmin":
+        return src, date.today()
+    last = conn.execute("SELECT MAX(day) FROM metrics WHERE source = 'sample'").fetchone()[0]
+    return (src, date.fromisoformat(last)) if last else None
+
+
 def body(days: int = 30) -> dict:
     days = 90 if days == 90 else 30
     with db.session() as conn:
-        src = _source(conn)
-        if src == "sample":  # the sample is a fixed window; anchor on its last day
-            last = conn.execute("SELECT MAX(day) FROM metrics WHERE source = 'sample'").fetchone()[0]
-            if not last:
-                return {"empty": True}
-            anchor = date.fromisoformat(last)
-        else:
-            anchor = date.today()
+        found = find_anchor(conn)
+        if not found:
+            return {"empty": True}
+        src, anchor = found
         start = anchor - timedelta(days=days - 1)
 
         def series(metric: str, since: date = start) -> list[tuple[str, float]]:

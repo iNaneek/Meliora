@@ -87,7 +87,7 @@
   $('sync').onclick = function () {
     if (!api) return;
     var b = this; b.disabled = true; $('src-garmin').innerHTML = '<i></i>Garmin · syncing…';
-    api.garmin_sync().then(function (r) { b.disabled = false; toast(r.msg); renderSources(); if (!$('bodyv').hidden) loadBody(); });
+    api.garmin_sync().then(function (r) { b.disabled = false; toast(r.msg); renderSources(); if (!$('bodyv').hidden) { loadBody(); loadOverview(); } });
   };
   $('reset').onclick = function () { api && api.reset().then(function (s) { render(s, true); toast('Demo reset.'); }); };
   document.querySelectorAll('[data-push]').forEach(function (b) {
@@ -144,7 +144,7 @@
     $('bodyv').hidden = v !== 'body';
     document.querySelectorAll('.nav[data-view]').forEach(function (n) { n.classList.toggle('on', n.dataset.view === v); });
     Charts.hideTip();
-    if (v === 'body') loadBody();
+    if (v === 'body') { loadBody(); loadOverview(); }
   }
   document.querySelectorAll('.nav[data-view]').forEach(function (n) {
     n.style.cursor = 'pointer';
@@ -200,6 +200,47 @@
       { name: 'Avg HR', get: function (a) { return a.avg_hr ? Math.round(a.avg_hr) + '' : '—'; } }
     ]);
     if (!d.activities.length) $('acts').textContent = 'No activities in this range.';
+  }
+
+  // ---------- Body overview (left column) ----------
+  // Python picks every fact; the on-device model only writes the top line. The facts render
+  // instantly, and the model's line replaces the plain one when it's ready.
+  var ovSeq = 0;
+  function byLine(h) {
+    if (h.pending) return 'Writing on-device…';
+    if (h.by === 'plain') return h.offline ? 'Plain summary · on-device model is off' : 'Plain summary';
+    return 'Written on-device · ' + h.by;
+  }
+  function setHeadline(h) {
+    var line = $('ov-line'); if (!line) return;
+    if (line.textContent === h.text) { $('ov-by').textContent = byLine(h); return; }
+    line.classList.add('fading');
+    setTimeout(function () { line.textContent = h.text; $('ov-by').textContent = byLine(h); line.classList.remove('fading'); }, 200);
+  }
+  function loadOverview() {
+    if (!api) return;
+    var seq = ++ovSeq;
+    api.body_overview().then(function (o) {
+      if (seq !== ovSeq) return;
+      renderOverview(o);
+      if (o.headline && o.headline.pending) api.body_headline().then(function (h) { if (seq === ovSeq) setHeadline(h); });
+    });
+  }
+  function renderOverview(o) {
+    var el = $('ov');
+    if (o.empty) { el.innerHTML = '<div class="ov-h"><b>Overview</b></div><p class="ov-empty">No body data yet.</p>'; return; }
+    var rows = o.rows.map(function (r) {
+      return '<li class="' + r.tone + '"><i></i><div><div class="ov-top"><b>' + esc(r.label) + '</b><span class="w">' + esc(r.word) + '</span></div>' +
+        '<div class="v">' + esc(r.value) + '</div><div class="ov-sub">' + esc(r.receipt) +
+        (r.as_of ? (r.receipt ? ' · ' : '') + '<span class="asof">as of ' + esc(r.as_of) + '</span>' : '') + '</div></div></li>';
+    }).join('');
+    var std = o.standouts.map(function (s) {
+      return '<li class="std ' + s.tone + '"><i></i><div><div class="t">' + esc(s.title) + '</div><div class="ov-sub">' + esc(s.value) +
+        ' · ' + esc(s.day) + (s.detail ? ' · ' + esc(s.detail) : '') + '</div></div></li>';
+    }).join('');
+    el.innerHTML = '<div class="ov-h"><b>Overview</b><span>' + (o.source === 'sample' ? 'sample · ' : '') + 'as of ' + esc(o.as_of) + '</span></div>' +
+      '<p class="ov-line" id="ov-line">' + esc(o.headline.text) + '</p><div class="ov-by" id="ov-by">' + esc(byLine(o.headline)) + '</div>' +
+      '<h4>Right now</h4><ul>' + rows + '</ul>' + (std ? '<h4>Stand-outs</h4><ul>' + std + '</ul>' : '');
   }
 
   function renderCard(card) {

@@ -6,6 +6,12 @@
 # Obsidian vault. ~ is expanded. The app writes only inside <vault>/Assistant/.
 path = "~/Documents/Vault"
 
+[models]
+# Local models run through Ollama (free, offline). Pull one with: ollama pull qwen3:4b
+fast = "qwen3:4b"          # short phrasing, e.g. the Body overview headline
+ollama_url = "http://localhost:11434"
+# ollama_bin = "/Applications/Ollama.app/Contents/Resources/ollama"   # Meliora starts this itself, only when needed
+
 [garmin]
 # History to fill with `uv run meliora-garmin backfill` (one time, resumable).
 backfill_since = "2026-09-01"
