@@ -15,12 +15,16 @@ import threading
 import time
 import urllib.error
 import urllib.request
+from pathlib import Path
 
 from meliora import config, db
 
 log = logging.getLogger(__name__)
-DEFAULTS = {"fast": "qwen3:4b", "ollama_url": "http://localhost:11434",
+DEFAULTS = {"fast": "qwen3:4b", "medium": "qwen3:8b", "big": "qwen3:30b-a3b",
+            "ollama_url": "http://localhost:11434",
             "ollama_bin": "/Applications/Ollama.app/Contents/Resources/ollama"}
+# The Ask drawer's model switch: tier, short label, rough download size.
+TIERS = [("fast", "4B", "2.5 GB"), ("medium", "8B", "5 GB"), ("big", "30B", "19 GB")]
 KEEP_ALIVE = "5m"  # the model leaves memory (~3 GB) 5 min after its last use
 PID_FILE = config.DATA_DIR / "ollama.pid"
 # Context window in tokens. Ollama otherwise sizes it to the Mac's memory (262k here), which
@@ -115,31 +119,91 @@ def _log(model: str, task: str, ms: int, tin, tout, ok: bool, detail: str = "") 
         log.exception("couldn't log model call")
 
 
-def local_json(task: str, system: str, user: str, schema: dict, tier: str = "fast",
-               timeout: float = 30) -> dict:
-    """Ask the local model for JSON matching `schema`. Raises Unavailable on any failure."""
+def installed(model: str) -> bool:
+    """Is the model downloaded? Read from disk, so asking doesn't start Ollama."""
+    name, _, tag = model.partition(":")
+    root = Path(os.environ.get("OLLAMA_MODELS", Path.home() / ".ollama" / "models"))
+    ns = "" if "/" in name else "library/"
+    return (root / "manifests" / "registry.ollama.ai" / f"{ns}{name}" / (tag or "latest")).exists()
+
+
+def tiers() -> list[dict]:
     s = settings()
-    model = s[tier]
+    return [{"tier": t, "label": label, "model": s[t], "size": size, "installed": installed(s[t])}
+            for t, label, size in TIERS]
+
+
+def _post(path: str, body: dict, timeout: float) -> dict:
+    req = urllib.request.Request(settings()["ollama_url"].rstrip("/") + path,
+                                 data=json.dumps(body).encode(), headers={"Content-Type": "application/json"})
+    with urllib.request.urlopen(req, timeout=timeout) as r:
+        return json.load(r)
+
+
+def _chat(task: str, messages: list[dict], tier: str, timeout: float, fmt: dict | None,
+          max_tokens: int | None = None) -> tuple[str, dict]:
+    """One non-streaming chat call. Returns (content, info). Raises Unavailable on any failure."""
+    model = settings()[tier]
     t0 = time.monotonic()
+    ms = lambda: int((time.monotonic() - t0) * 1000)  # noqa: E731
+    if not installed(model):
+        _log(model, task, 0, None, None, False, "not downloaded")
+        raise Unavailable(f"{model} isn't downloaded")
     try:
         ensure_server()
     except Unavailable as e:
-        _log(model, task, int((time.monotonic() - t0) * 1000), None, None, False, str(e))
+        _log(model, task, ms(), None, None, False, str(e))
         raise
-    body = {
-        "model": model, "stream": False, "think": False, "keep_alive": KEEP_ALIVE,
-        "format": schema, "options": {"temperature": 0.3, "num_ctx": NUM_CTX},
-        "messages": [{"role": "system", "content": system}, {"role": "user", "content": user}],
-    }
-    req = urllib.request.Request(s["ollama_url"].rstrip("/") + "/api/chat",
-                                 data=json.dumps(body).encode(), headers={"Content-Type": "application/json"})
+    body = {"model": model, "stream": False, "think": False, "keep_alive": KEEP_ALIVE,
+            "options": {"temperature": 0.3, "num_ctx": NUM_CTX}, "messages": messages}
+    if max_tokens:
+        body["options"]["num_predict"] = max_tokens
+    if fmt:
+        body["format"] = fmt
     try:
-        with urllib.request.urlopen(req, timeout=timeout) as r:
-            resp = json.load(r)
-        out = json.loads(resp["message"]["content"])
+        resp = _post("/api/chat", body, timeout)
+        content = resp["message"]["content"]
     except (urllib.error.URLError, TimeoutError, OSError, KeyError, ValueError) as e:
-        _log(model, task, int((time.monotonic() - t0) * 1000), None, None, False, repr(e))
+        _log(model, task, ms(), None, None, False, repr(e))
         raise Unavailable(str(e)) from e
-    _log(model, task, int((time.monotonic() - t0) * 1000),
-         resp.get("prompt_eval_count"), resp.get("eval_count"), True)
-    return out
+    info = {"model": model, "ms": ms(), "tokens_in": resp.get("prompt_eval_count"),
+            "tokens_out": resp.get("eval_count")}
+    _log(model, task, info["ms"], info["tokens_in"], info["tokens_out"], True)
+    return content, info
+
+
+def local_json(task: str, system: str, user: str, schema: dict, tier: str = "fast",
+               timeout: float = 30) -> dict:
+    """Ask the local model for JSON matching `schema`. Raises Unavailable on any failure."""
+    content, _ = _chat(task, [{"role": "system", "content": system}, {"role": "user", "content": user}],
+                       tier, timeout, schema)
+    try:
+        return json.loads(content)
+    except ValueError as e:
+        raise Unavailable("model returned bad JSON") from e
+
+
+def local_text(task: str, messages: list[dict], tier: str = "fast", timeout: float = 120,
+               max_tokens: int = 2500) -> tuple[str, dict]:
+    """Free-text chat. `messages` includes the system message. Raises Unavailable on any failure.
+    Thinking-only models (the current qwen3:4b tag) write their reasoning before `</think>`
+    whatever `think` says; only the part after it is returned. `max_tokens` caps the whole
+    reply, reasoning included, so a ramble can't run on."""
+    content, info = _chat(task, messages, tier, timeout, None, max_tokens)
+    if "<think>" in content and "</think>" not in content or (
+            "</think>" not in content and info["tokens_out"] and info["tokens_out"] >= max_tokens):
+        raise Unavailable("the model ran out of room before answering")
+    return content.split("</think>")[-1].strip(), info
+
+
+def warm(tier: str = "fast") -> None:
+    """Load a model ahead of use (the Ask drawer opening). Same options as real calls, or
+    Ollama would reload it. Silent on failure: the real call reports the problem."""
+    model = settings()[tier]
+    if not installed(model):
+        return
+    try:
+        ensure_server()
+        _post("/api/generate", {"model": model, "keep_alive": KEEP_ALIVE, "options": {"num_ctx": NUM_CTX}}, 60)
+    except (Unavailable, urllib.error.URLError, OSError, ValueError):
+        log.info("warm %s failed", model)

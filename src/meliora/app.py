@@ -8,7 +8,7 @@ from pathlib import Path
 
 import webview
 
-from meliora import body, config, db, garmin, llm, overview, rules, weather
+from meliora import body, chat, config, db, garmin, llm, overview, rules, weather
 
 UI = Path(__file__).parent / "ui" / "index.html"
 
@@ -68,14 +68,18 @@ class Api:
         h = config.home()
         return {"name": h["name"], "lat": h["lat"], "lon": h["lon"]}
 
-    def ask(self, text: str) -> str:
-        state = self.today()
-        nxt = state["next"]
-        where = f"{nxt['what']} ({nxt['label'].lower()})" if nxt else "nothing else today"
-        return (
-            "Chat isn't wired to Qwen3 or Claude yet (Phase 0, step 7). "
-            f"Your next thing is {where}."
-        )
+    def ask(self, text: str, tier: str = "fast", history: list | None = None) -> dict:
+        """The Ask drawer. Slow (local model); pywebview runs this off the UI thread."""
+        if tier not in dict((t, 1) for t, _, _ in llm.TIERS):
+            tier = "fast"
+        return chat.answer(str(text)[:2000], history or [], tier)
+
+    def chat_models(self) -> list:
+        return llm.tiers()
+
+    def chat_warm(self, tier: str = "fast") -> None:
+        """Drawer opened: load the model in the background so the first answer is quicker."""
+        threading.Thread(target=llm.warm, args=(tier,), daemon=True).start()
 
 
 def _set_app_name(name: str) -> None:

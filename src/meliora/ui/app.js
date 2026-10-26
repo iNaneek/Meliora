@@ -93,14 +93,53 @@
   document.querySelectorAll('[data-push]').forEach(function (b) {
     b.onclick = function () { document.querySelectorAll('[data-push]').forEach(function (o) { o.classList.toggle('on', o === b); }); };
   });
-  $('ask').onclick = function () { $('drawer').classList.toggle('open'); setTimeout(function () { $('q').focus(); }, 220); };
+  // ---------- Ask drawer ----------
+  // A local model answers from a briefing Python builds. Opening the drawer loads the model;
+  // nothing runs while it's closed.
+  var tier = 'fast', history = [], asking = false;
+  try { tier = localStorage.getItem('ask-tier') || 'fast'; } catch (e) {}
+  function renderTiers(list) {
+    if (!list.some(function (t) { return t.tier === tier && t.installed; })) tier = 'fast';
+    $('tiers').innerHTML = list.map(function (t) {
+      var title = t.installed ? 'Qwen3 ' + t.label + ' (' + t.model + ')' : 'Qwen3 ' + t.label + ' isn\'t downloaded (' + t.size + ')';
+      return '<button data-tier="' + t.tier + '" data-size="' + esc(t.size) + '" data-label="' + esc(t.label) + '" class="' +
+        (t.tier === tier ? 'on' : '') + (t.installed ? '' : ' missing') + '" title="' + esc(title) + '">' + esc(t.label) + '</button>';
+    }).join('');
+  }
+  $('tiers').onclick = function (e) {
+    var b = e.target.closest('button[data-tier]'); if (!b) return;
+    if (b.classList.contains('missing')) { toast('Qwen3 ' + b.dataset.label + ' isn\'t downloaded yet (' + b.dataset.size + ').'); return; }
+    tier = b.dataset.tier;
+    try { localStorage.setItem('ask-tier', tier); } catch (err) {}
+    document.querySelectorAll('#tiers button').forEach(function (o) { o.classList.toggle('on', o === b); });
+    api.chat_warm(tier);
+  };
+  $('ask').onclick = function () {
+    var open = $('drawer').classList.toggle('open');
+    if (open && api) api.chat_models().then(function (list) { renderTiers(list); api.chat_warm(tier); });
+    setTimeout(function () { $('q').focus(); }, 220);
+  };
   $('close').onclick = function () { $('drawer').classList.remove('open'); };
   $('compose').onsubmit = function (e) {
-    e.preventDefault(); var q = $('q').value.trim(); if (!q || !api) return;
+    e.preventDefault(); var q = $('q').value.trim(); if (!q || !api || asking) return;
     var msgs = $('msgs');
-    msgs.insertAdjacentHTML('beforeend', '<div class="m u">' + esc(q) + '</div><div class="m a pending">…</div>');
-    $('q').value = '';
-    api.ask(q).then(function (a) { var p = msgs.querySelector('.pending'); p.textContent = a; p.classList.remove('pending'); msgs.scrollTop = 1e6; });
+    msgs.insertAdjacentHTML('beforeend', '<div class="m u">' + esc(q) + '</div><div class="m a pending">Thinking…</div>');
+    msgs.scrollTop = 1e6;
+    $('q').value = ''; asking = true;
+    api.ask(q, tier, history.slice(-6)).then(function (r) {
+      var p = msgs.querySelector('.pending');
+      p.classList.remove('pending');
+      p.textContent = r.text;
+      if (!r.ok) p.classList.add('err');
+      else {
+        history.push({ role: 'user', content: q }, { role: 'assistant', content: r.text });
+        var by = r.model === 'rules' ? 'from the plan, no model' : r.model + ' · ' + (r.ms / 1000).toFixed(1) + ' s';
+        p.insertAdjacentHTML('beforeend', '<span class="by">' + esc(by) + '</span>');
+      }
+      msgs.scrollTop = 1e6;
+    }).catch(function (err) {
+      var p = msgs.querySelector('.pending'); p.classList.remove('pending'); p.classList.add('err'); p.textContent = 'Error: ' + err;
+    }).then(function () { asking = false; });
   };
 
   // Per-source "last synced". Stale is shown, not hidden: the app keeps working on the cache.
