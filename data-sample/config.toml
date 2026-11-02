@@ -7,10 +7,11 @@
 path = "~/Documents/Vault"
 
 [models]
-# Local models run through Ollama (free, offline). Pull one with: ollama pull qwen3:4b
-fast = "qwen3:4b"          # short phrasing (Body headline) and the default for Ask
+# Local models run through Ollama (free, offline). Use instruct builds: the plain qwen3:4b
+# and qwen3:30b-a3b tags are thinking-only and slow. Download: ollama pull qwen3:4b-instruct
+fast = "qwen3:4b-instruct" # short phrasing (Body headline) and the default for Ask
 medium = "qwen3:8b"        # Ask drawer, middle option
-big = "qwen3:30b-a3b"      # Ask drawer, largest option
+big = "qwen3:30b-instruct" # Ask drawer, largest option
 ollama_url = "http://localhost:11434"
 # ollama_bin = "/Applications/Ollama.app/Contents/Resources/ollama"   # Meliora starts this itself, only when needed
 

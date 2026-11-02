@@ -20,11 +20,13 @@ from pathlib import Path
 from meliora import config, db
 
 log = logging.getLogger(__name__)
-DEFAULTS = {"fast": "qwen3:4b", "medium": "qwen3:8b", "big": "qwen3:30b-a3b",
+# Instruct (non-thinking) builds: the plain qwen3:4b and qwen3:30b-a3b tags now point at
+# thinking-only models that reason for hundreds of tokens before every answer.
+DEFAULTS = {"fast": "qwen3:4b-instruct", "medium": "qwen3:8b", "big": "qwen3:30b-instruct",
             "ollama_url": "http://localhost:11434",
             "ollama_bin": "/Applications/Ollama.app/Contents/Resources/ollama"}
 # The Ask drawer's model switch: tier, short label, rough download size.
-TIERS = [("fast", "4B", "2.5 GB"), ("medium", "8B", "5 GB"), ("big", "30B", "19 GB")]
+TIERS = [("fast", "4B", "2.5 GB"), ("medium", "8B", "5.2 GB"), ("big", "30B", "18.6 GB")]
 KEEP_ALIVE = "5m"  # the model leaves memory (~3 GB) 5 min after its last use
 PID_FILE = config.DATA_DIR / "ollama.pid"
 # Context window in tokens. Ollama otherwise sizes it to the Mac's memory (262k here), which
@@ -77,19 +79,52 @@ def ensure_server() -> None:
         exe = s["ollama_bin"] if os.path.exists(s["ollama_bin"]) else shutil.which("ollama")
         if not exe:
             raise Unavailable("Ollama isn't installed")
-        logf = open(config.DATA_DIR / "ollama.log", "ab")
-        proc = subprocess.Popen([exe, "serve"], stdout=logf, stderr=logf, stdin=subprocess.DEVNULL)
+        for attempt in range(1, GPU_TRIES + 1):
+            proc, device = _start(exe, s["ollama_url"])
+            if device != "cpu" or attempt == GPU_TRIES:
+                break
+            # Ollama's GPU probe sometimes fails, and then the whole run is CPU-only (~10x slower,
+            # more battery). A fresh start usually finds the GPU again.
+            log.warning("ollama started without the GPU (attempt %d); restarting it", attempt)
+            proc.terminate()
+            try:
+                proc.wait(timeout=10)
+            except subprocess.TimeoutExpired:
+                proc.kill()
+            time.sleep(1)
+        if device == "cpu":
+            log.warning("ollama is running on the CPU only; answers will be slow")
         _owned_pid = proc.pid
         PID_FILE.write_text(str(proc.pid))
-        log.info("started ollama serve (pid %d)", proc.pid)
-        deadline = time.monotonic() + 15
-        while time.monotonic() < deadline:
-            if _up(s["ollama_url"]):
-                return
-            if proc.poll() is not None:
-                break
-            time.sleep(0.25)
-        raise Unavailable("ollama serve didn't come up")
+        log.info("started ollama serve (pid %d, %s)", proc.pid, device)
+
+
+GPU_TRIES = 3
+
+
+def _start(exe: str, url: str) -> tuple[subprocess.Popen, str]:
+    """Start `ollama serve` and wait until it answers. Returns (process, "gpu"|"cpu"|"unknown"),
+    read from the "inference compute" line it writes to its log at startup."""
+    log_path = config.DATA_DIR / "ollama.log"
+    offset = log_path.stat().st_size if log_path.exists() else 0
+    logf = open(log_path, "ab")
+    proc = subprocess.Popen([exe, "serve"], stdout=logf, stderr=logf, stdin=subprocess.DEVNULL)
+    deadline = time.monotonic() + 20
+    device = "unknown"
+    while time.monotonic() < deadline:
+        if proc.poll() is not None:
+            raise Unavailable("ollama serve exited at startup (see data/ollama.log)")
+        with open(log_path, "rb") as f:
+            f.seek(offset)
+            new = f.read().decode(errors="replace")
+        line = next((ln for ln in new.splitlines() if '"inference compute"' in ln), None)
+        if line:
+            device = "cpu" if "library=cpu" in line else "gpu"
+        if line and _up(url):
+            return proc, device
+        time.sleep(0.25)
+    proc.terminate()
+    raise Unavailable("ollama serve didn't come up")
 
 
 def shutdown() -> None:
