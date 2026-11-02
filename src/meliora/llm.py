@@ -28,7 +28,6 @@ DEFAULTS = {"fast": "qwen3:4b-instruct", "medium": "qwen3:8b", "big": "qwen3:30b
 # The Ask drawer's model switch: tier, short label, rough download size.
 TIERS = [("fast", "4B", "2.5 GB"), ("medium", "8B", "5.2 GB"), ("big", "30B", "18.6 GB")]
 KEEP_ALIVE = "5m"  # the model leaves memory (~3 GB) 5 min after its last use
-PID_FILE = config.DATA_DIR / "ollama.pid"
 # Context window in tokens. Ollama otherwise sizes it to the Mac's memory (262k here), which
 # reserved 43 GB for a 3 GB model. Prompts here are ~500 tokens.
 NUM_CTX = 4096
@@ -45,9 +44,15 @@ def settings() -> dict:
 # ---------- the Ollama server: started on first use, stopped when Meliora quits ----------
 # Battery: the Ollama app (menu-bar icon, updater) is never opened. Meliora runs only the
 # bare `ollama serve`, and only once something actually needs the model.
+#
+# It's started through launchd (`launchctl submit`), not as a child process. When Meliora is
+# opened from the Dock, an `ollama serve` it starts directly can't reach the GPU (Metal) and
+# runs CPU-only, ~10x slower. The same binary handed to launchd gets the GPU.
 
+LABEL = "com.keenan.meliora.ollama"
+GPU_TRIES = 2
 _server_lock = threading.Lock()
-_owned_pid: int | None = None  # set when Meliora started the server, so it's ours to stop
+_owned = False  # Meliora submitted the launchd job, so it's ours to stop
 
 
 def _up(url: str) -> bool:
@@ -58,62 +63,53 @@ def _up(url: str) -> bool:
         return False
 
 
-def _pid_alive(pid: int) -> bool:
-    try:
-        os.kill(pid, 0)
-        return True
-    except OSError:
-        return False
+def _job_loaded() -> bool:
+    return subprocess.run(["launchctl", "list", LABEL], capture_output=True).returncode == 0
+
+
+def _remove_job() -> None:
+    subprocess.run(["launchctl", "remove", LABEL], capture_output=True)  # SIGTERM; ollama exits cleanly
 
 
 def ensure_server() -> None:
     """Start `ollama serve` if nothing is listening. Raises Unavailable if it can't."""
-    global _owned_pid
+    global _owned
     s = settings()
     with _server_lock:
         if _up(s["ollama_url"]):
-            if _owned_pid is None and PID_FILE.exists():  # left running by a Meliora that crashed: adopt it
-                pid = int(PID_FILE.read_text() or 0)
-                _owned_pid = pid if pid and _pid_alive(pid) else None
+            _owned = _owned or _job_loaded()  # left running by a Meliora that crashed: adopt it
             return
         exe = s["ollama_bin"] if os.path.exists(s["ollama_bin"]) else shutil.which("ollama")
         if not exe:
             raise Unavailable("Ollama isn't installed")
+        _remove_job()  # a stale job from a crash that isn't answering
         for attempt in range(1, GPU_TRIES + 1):
-            proc, device = _start(exe, s["ollama_url"])
+            device = _start(exe, s["ollama_url"])
+            _owned = True
             if device != "cpu" or attempt == GPU_TRIES:
                 break
-            # Ollama's GPU probe sometimes fails, and then the whole run is CPU-only (~10x slower,
-            # more battery). A fresh start usually finds the GPU again.
             log.warning("ollama started without the GPU (attempt %d); restarting it", attempt)
-            proc.terminate()
-            try:
-                proc.wait(timeout=10)
-            except subprocess.TimeoutExpired:
-                proc.kill()
+            _remove_job()
             time.sleep(1)
         if device == "cpu":
             log.warning("ollama is running on the CPU only; answers will be slow")
-        _owned_pid = proc.pid
-        PID_FILE.write_text(str(proc.pid))
-        log.info("started ollama serve (pid %d, %s)", proc.pid, device)
+        log.info("started ollama serve via launchd (%s)", device)
 
 
-GPU_TRIES = 3
-
-
-def _start(exe: str, url: str) -> tuple[subprocess.Popen, str]:
-    """Start `ollama serve` and wait until it answers. Returns (process, "gpu"|"cpu"|"unknown"),
-    read from the "inference compute" line it writes to its log at startup."""
+def _start(exe: str, url: str) -> str:
+    """Submit `ollama serve` to launchd and wait until it answers. Returns "gpu", "cpu" or
+    "unknown", read from the "inference compute" line it logs at startup."""
     log_path = config.DATA_DIR / "ollama.log"
-    offset = log_path.stat().st_size if log_path.exists() else 0
-    logf = open(log_path, "ab")
-    proc = subprocess.Popen([exe, "serve"], stdout=logf, stderr=logf, stdin=subprocess.DEVNULL)
+    log_path.touch()
+    offset = log_path.stat().st_size
+    host = url.split("://", 1)[-1].rstrip("/")
+    r = subprocess.run(["launchctl", "submit", "-l", LABEL, "-o", str(log_path), "-e", str(log_path), "--",
+                        "/usr/bin/env", f"OLLAMA_HOST={host}", exe, "serve"], capture_output=True, text=True)
+    if r.returncode != 0:
+        raise Unavailable(f"launchctl submit failed: {r.stderr.strip()[:120]}")
     deadline = time.monotonic() + 20
     device = "unknown"
     while time.monotonic() < deadline:
-        if proc.poll() is not None:
-            raise Unavailable("ollama serve exited at startup (see data/ollama.log)")
         with open(log_path, "rb") as f:
             f.seek(offset)
             new = f.read().decode(errors="replace")
@@ -121,23 +117,19 @@ def _start(exe: str, url: str) -> tuple[subprocess.Popen, str]:
         if line:
             device = "cpu" if "library=cpu" in line else "gpu"
         if line and _up(url):
-            return proc, device
+            return device
         time.sleep(0.25)
-    proc.terminate()
+    _remove_job()
     raise Unavailable("ollama serve didn't come up")
 
 
 def shutdown() -> None:
     """Stop the server if Meliora started it. An Ollama someone else started is left alone."""
-    global _owned_pid
-    pid, _owned_pid = _owned_pid, None
-    if pid and _pid_alive(pid):
-        try:
-            os.kill(pid, 15)  # SIGTERM: ollama unloads models and exits
-            log.info("stopped ollama serve (pid %d)", pid)
-        except OSError:
-            pass
-    PID_FILE.unlink(missing_ok=True)
+    global _owned
+    if _owned:
+        _remove_job()
+        log.info("stopped ollama serve")
+    _owned = False
 
 
 atexit.register(shutdown)
