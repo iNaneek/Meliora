@@ -116,10 +116,11 @@
   };
   $('ask').onclick = function () {
     var open = $('drawer').classList.toggle('open');
+    if (!open && document.activeElement) document.activeElement.blur();
     if (open && api) api.chat_models().then(function (list) { renderTiers(list); api.chat_warm(tier); });
     setTimeout(function () { $('q').focus(); }, 220);
   };
-  $('close').onclick = function () { $('drawer').classList.remove('open'); };
+  $('close').onclick = function () { document.activeElement && document.activeElement.blur(); $('drawer').classList.remove('open'); };
   $('compose').onsubmit = function (e) {
     e.preventDefault(); var q = $('q').value.trim(); if (!q || !api || asking) return;
     var msgs = $('msgs');

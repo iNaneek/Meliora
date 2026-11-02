@@ -23,7 +23,9 @@
 }
 
 *{box-sizing:border-box}
-html,body{margin:0;height:100%;overflow:hidden}
+/* clip, not hidden: hidden boxes can still be scrolled by focus, which shoved the page sideways
+   when the Ask drawer slid out with its text box focused. */
+html,body{margin:0;height:100%;overflow:clip}
 body{font:13px/1.4 var(--sans);color:var(--ink);background:#0B1026;-webkit-font-smoothing:antialiased;transition:color .6s}
 button{font:inherit;color:inherit;cursor:pointer}
 button:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
@@ -49,7 +51,7 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline
 #ridge-lit{mix-blend-mode:screen;transition:opacity .6s}
 
 /* ---------- app grid ---------- */
-.app{position:relative;height:100vh;display:grid;grid-template-columns:232px minmax(0,1fr);grid-template-rows:56px minmax(0,1fr);gap:12px;padding:12px}
+.app{position:relative;height:100vh;overflow:clip;display:grid;grid-template-columns:232px minmax(0,1fr);grid-template-rows:56px minmax(0,1fr);gap:12px;padding:12px}
 .glass{background:var(--glass);border:1px solid var(--edge);border-radius:16px;
   -webkit-backdrop-filter:blur(24px) saturate(1.5);backdrop-filter:blur(24px) saturate(1.5);
   box-shadow:0 10px 40px rgba(5,8,25,.18);transition:background .6s,border-color .6s}
@@ -124,8 +126,8 @@ nav{display:flex;flex-direction:column;gap:2px}
 :root[data-ink="light"] .pa button.y{color:#fff}
 
 /* ---------- drawer ---------- */
-.drawer{position:absolute;top:80px;right:12px;bottom:12px;width:380px;display:flex;flex-direction:column;transform:translateX(calc(100% + 30px));transition:transform .25s ease;z-index:5}
-.drawer.open{transform:none}
+.drawer{position:absolute;top:80px;right:12px;bottom:12px;width:380px;display:flex;flex-direction:column;transform:translateX(calc(100% + 30px));visibility:hidden;transition:transform .25s ease,visibility 0s linear .25s;z-index:5}
+.drawer.open{transform:none;visibility:visible;transition:transform .25s ease,visibility 0s}
 .dh{display:flex;align-items:center;padding:12px 14px;border-bottom:1px solid var(--edge)}
 .dh{gap:10px}
 .dh b{flex:1}
