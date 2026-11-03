@@ -1,13 +1,15 @@
 """Deterministic rules: given the day's blocks and the clock, decide The Sentence.
 
 No model involved. Everything shown cites a number or time from the data (receipts).
-The day itself is demo data (data/demo_day.json, or the fake sample) until the
-Calendar and Canvas collectors exist.
+The day comes from Apple Calendar once it's connected (see `today_day`), otherwise from
+demo data (data/demo_day.json, or the fake sample). Deadlines and job hours stay demo-only
+until the Canvas collector and job tracking exist.
 """
 
+import hashlib
 import json
 from dataclasses import asdict, dataclass, field
-from datetime import datetime
+from datetime import date, datetime
 
 from meliora import config
 
@@ -31,13 +33,50 @@ class Block:
 @dataclass
 class Day:
     blocks: list[Block]
-    deadline: dict  # name, short, due, due_day, estimate_h (P75)
+    deadline: dict | None  # name, short, due, due_day, estimate_h (P75); None until Canvas
     job: dict = field(default_factory=lambda: {"target_h": 0, "done_h": 0})
+    all_day: list[str] = field(default_factory=list)  # all-day event titles (not on the timeline)
+    source: str = "demo"  # demo | calendar
 
 
 def demo_day() -> Day:
     raw = json.loads(config.find("demo_day.json").read_text())
     return Day([Block(**b) for b in raw["blocks"]], raw["deadline"], raw.get("job", {}))
+
+
+def calendar_day(day: date) -> Day:
+    """Today's Apple Calendar events as fixed (ink) blocks. Times are hours since midnight,
+    clipped to the day, so an event that started yesterday begins at 0."""
+    from meliora import calendars
+
+    midnight = datetime.combine(day, datetime.min.time())
+    blocks, all_day = [], []
+    for e in calendars.day_events(day):
+        if e["all_day"]:
+            all_day.append(e["title"])
+            continue
+        start = max(0.0, (datetime.fromisoformat(e["start"]) - midnight).total_seconds() / 3600)
+        end = min(24.0, (datetime.fromisoformat(e["end"]) - midnight).total_seconds() / 3600)
+        if end <= start:
+            continue
+        bid = "ev-" + hashlib.sha1(e["id"].encode()).hexdigest()[:10]
+        blocks.append(Block(id=bid, start=start, end=end, kind="ink", title=e["title"],
+                            sub=e["location"] or e["calendar"], where=e["location"]))
+    return Day(blocks, None, {}, all_day, "calendar")
+
+
+def today_day(now: datetime) -> Day:
+    """The real calendar when it's connected, otherwise the demo day."""
+    from meliora import calendars
+
+    if calendars.connected():
+        try:
+            calendars.refresh()
+        except Exception:  # degrade honestly: keep the last copy in SQLite
+            import logging
+            logging.getLogger(__name__).exception("calendar refresh failed")
+        return calendar_day(now.date())
+    return demo_day()
 
 
 def fmt(h: float, ampm: bool = True) -> str:
@@ -64,7 +103,7 @@ def decide(day: Day, decisions: dict[str, str], now: datetime) -> dict:
     nxt = upcoming[0] if upcoming else None
 
     ps_planned = sum(b.deadline_hours for b in live)
-    ps_short = dl["estimate_h"] - ps_planned
+    ps_short = dl["estimate_h"] - ps_planned if dl else 0
 
     # Rule 1: a deadline inside 72 h with unplanned hours beats everything.
     if ps_short > 0:
@@ -78,7 +117,7 @@ def decide(day: Day, decisions: dict[str, str], now: datetime) -> dict:
     elif nxt:
         lead = "Then start" if current else "Start"
         sentence = f"{lead} {nxt.title} at <mark>{fmt(nxt.start, ampm=False)}</mark>."
-        if nxt.deadline_hours:
+        if nxt.deadline_hours and dl:
             sentence += f" It's due {dl['due_day']}, and today is your last open runway."
         because = [f"{fmt(nxt.start)}–{fmt(nxt.end)}", nxt.sub]
         if current:
@@ -88,7 +127,7 @@ def decide(day: Day, decisions: dict[str, str], now: datetime) -> dict:
         because = [f"ends {fmt(current.end)}", "nothing else after it"]
     else:
         sentence = "Nothing else needs you today. <mark>Rest is the plan.</mark>"
-        because = ["0 blocks left", f"{fmt_dur(ps_planned)} of {dl['short']} planned"]
+        because = ["0 blocks left"] + ([f"{fmt_dur(ps_planned)} of {dl['short']} planned"] if dl else [])
 
     job = blocks_by_id(blocks).get("job")
     job_state = decisions.get("job", "pending")
@@ -103,6 +142,8 @@ def decide(day: Day, decisions: dict[str, str], now: datetime) -> dict:
         "job": {"done": day.job.get("done_h", 0), "target": day.job.get("target_h", 0),
                 "extra": 0 if job_state == "decline" or not job else job.hours, "state": job_state},
         "pending": sum(1 for b in blocks if b.kind == "pen" and b.id not in decisions),
+        "source": day.source,
+        "all_day": day.all_day,
     }
 
 

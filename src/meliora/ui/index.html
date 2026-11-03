@@ -54,7 +54,7 @@
     </div>
     <div class="why">Steve Jobs<em>"Stay hungry, stay foolish."</em></div>
     <div class="sources">
-      <div class="src off"><i></i>Calendar · not connected</div>
+      <div class="src off"><span id="src-cal"><i></i>Calendar · not connected</span><button class="sync" id="cal-connect" title="Let Meliora read Apple Calendar">Connect</button></div>
       <div class="src off"><i></i>Canvas · not connected</div>
       <div class="src off" id="src-weather"><i></i>Weather · not synced yet</div>
       <div class="src off"><span id="src-garmin"><i></i>Garmin · not connected</span><button class="sync" id="sync" title="Pull from Garmin now">Sync</button></div>
@@ -81,7 +81,7 @@
     </section>
 
     <section class="agenda glass">
-      <div class="agenda-h"><h3>Today</h3><span class="tag-demo">demo day</span></div>
+      <div class="agenda-h"><h3>Today</h3><span class="allday" id="allday"></span><span class="tag-demo" id="tag-demo">demo day</span></div>
       <div class="rows" id="rows"></div>
     </section>
 

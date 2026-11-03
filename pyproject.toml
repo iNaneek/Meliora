@@ -10,6 +10,7 @@ requires-python = ">=3.12"
 dependencies = [
     "garminconnect>=0.3.19",
     "keyring>=25.7.0",
+    "pyobjc-framework-eventkit>=12.2,<13",
     "pywebview>=6.2.1",
 ]
 

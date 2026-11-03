@@ -8,7 +8,7 @@ from pathlib import Path
 
 import webview
 
-from meliora import body, chat, config, db, garmin, llm, overview, rules, weather
+from meliora import body, calendars, chat, config, db, garmin, llm, overview, rules, weather
 
 UI = Path(__file__).parent / "ui" / "index.html"
 
@@ -18,7 +18,7 @@ class Api:
 
     def today(self) -> dict:
         now = datetime.now()
-        return rules.decide(rules.demo_day(), db.decisions(now.date().isoformat()), now)
+        return rules.decide(rules.today_day(now), db.decisions(now.date().isoformat()), now)
 
     def decide(self, block_id: str, decision: str) -> dict:
         if decision not in ("confirm", "decline"):
@@ -37,7 +37,19 @@ class Api:
 
     def sources(self) -> dict:
         return {"weather": weather.last_synced(), "weather_busy": _weather_busy.is_set(),
-                "today": weather.today_line(), "garmin": garmin.status()}
+                "today": weather.today_line(), "garmin": garmin.status(),
+                "calendar": calendars.sync_status()}
+
+    def calendar_connect(self) -> dict:
+        """The sidebar's Connect button: macOS asks once, then events are read in."""
+        access = calendars.request_access()
+        if access == "granted":
+            n = calendars.refresh(force=True)
+            return {"ok": True, "msg": f"Calendar connected: {n} events in the next 3 weeks."}
+        if access in ("denied", "restricted", "write_only"):
+            return {"ok": False, "msg": "Calendar access is off. Turn on Meliora in System Settings → "
+                    "Privacy & Security → Calendars, then relaunch."}
+        return {"ok": False, "msg": "No answer from macOS. Try Connect again."}
 
     def garmin_sync(self) -> dict:
         """The Sync button. pywebview runs js_api calls off the UI thread, so blocking is fine."""

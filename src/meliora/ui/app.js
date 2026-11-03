@@ -45,6 +45,10 @@
     } else draw();
     renderRows(s);
     $('pendcount').textContent = s.pending ? s.pending + ' pencil' : '';
+    var demo = s.source !== 'calendar';
+    $('tag-demo').hidden = !demo; $('reset').hidden = !demo;
+    $('allday').textContent = s.all_day && s.all_day.length ? 'All day: ' + s.all_day.join(' · ') : '';
+    if (!demo && !s.blocks.length) $('rows').innerHTML = '<div class="row past"><span class="tm"></span><span><b>Nothing on your calendar today</b></span></div>';
   }
 
   function renderNext(n) {
@@ -88,6 +92,14 @@
     if (!api) return;
     var b = this; b.disabled = true; $('src-garmin').innerHTML = '<i></i>Garmin · syncing…';
     api.garmin_sync().then(function (r) { b.disabled = false; toast(r.msg); renderSources(); if (!$('bodyv').hidden) { loadBody(); loadOverview(); } });
+  };
+  $('cal-connect').onclick = function () {
+    if (!api) return;
+    var b = this; b.disabled = true; $('src-cal').innerHTML = '<i></i>Calendar · waiting for macOS…';
+    api.calendar_connect().then(function (r) {
+      b.disabled = false; toast(r.msg); renderSources();
+      api.today().then(function (s) { render(s, true); });
+    });
   };
   $('reset').onclick = function () { api && api.reset().then(function (s) { render(s, true); toast('Demo reset.'); }); };
   document.querySelectorAll('[data-push]').forEach(function (b) {
@@ -165,6 +177,15 @@
       var gfresh = gt && gt.toDateString() === new Date().toDateString() && g.detail !== 'waiting on sleep';
       $('src-garmin').parentNode.className = 'src' + (gfresh ? '' : ' off');
       $('src-garmin').innerHTML = '<i></i>Garmin · ' + glabel;
+      var c = src.calendar, ct = c.last_ok && new Date(c.last_ok), clabel, showBtn = true;
+      if (c.access === 'granted' && ct) { clabel = clock(ct) + (c.detail ? ' · ' + c.detail : ''); showBtn = false; }
+      else if (c.access === 'granted') clabel = 'allowed, not read yet';
+      else if (c.access === 'unavailable') { clabel = 'EventKit missing'; showBtn = false; }
+      else if (c.access === 'not_asked') clabel = 'not connected';
+      else clabel = 'access off';
+      $('src-cal').parentNode.className = 'src' + (c.access === 'granted' && ct ? '' : ' off');
+      $('src-cal').innerHTML = '<i></i>Calendar · ' + esc(clabel);
+      $('cal-connect').hidden = !showBtn;
       var w = src.today;
       $('wx').textContent = [homeName, w && w.high_f + '° / ' + w.low_f + '°', w && w.sky, w && w.precip].filter(Boolean).join(' · ');
     });

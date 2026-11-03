@@ -28,6 +28,10 @@ cat > "$APP/Contents/Info.plist" <<PLIST
   <key>CFBundleShortVersionString</key><string>0.1.0</string>
   <key>LSMinimumSystemVersion</key><string>13.0</string>
   <key>NSHighResolutionCapable</key><true/>
+  <key>NSCalendarsFullAccessUsageDescription</key><string>Meliora reads your calendar to plan your day around classes, work and training.</string>
+  <key>NSCalendarsUsageDescription</key><string>Meliora reads your calendar to plan your day around classes, work and training.</string>
+  <key>NSRemindersFullAccessUsageDescription</key><string>Meliora reads and adds reminders so plans reach your phone.</string>
+  <key>NSRemindersUsageDescription</key><string>Meliora reads and adds reminders so plans reach your phone.</string>
 </dict></plist>
 PLIST
 
@@ -39,6 +43,10 @@ cd "$REPO"
 exec "$REPO/.venv/bin/python" -m meliora >> "$REPO/data/app.log" 2>&1
 LAUNCH
 chmod +x "$APP/Contents/MacOS/Meliora"
+
+# Ad-hoc signature: gives macOS a stable identity to attach permission grants (Calendar,
+# Reminders) to. Rebuilding changes it, so macOS may ask again after a rebuild.
+codesign --force --sign - "$APP"
 
 touch "$APP"  # nudge Finder/Dock to pick up the icon
 echo "Built $APP"

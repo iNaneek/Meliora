@@ -28,7 +28,8 @@ def _fmt_h(h: float) -> str:
 
 def briefing(now: datetime | None = None) -> str:
     now = now or datetime.now()
-    state = rules.decide(rules.demo_day(), db.decisions(now.date().isoformat()), now)
+    day = rules.today_day(now)
+    state = rules.decide(day, db.decisions(now.date().isoformat()), now)
     lines = [f"Now: {now:%A, %B} {now.day}, {_fmt_h(state['now'])}"]
     nxt = state["next"]
     if nxt:
@@ -39,7 +40,8 @@ def briefing(now: datetime | None = None) -> str:
         status = " (declined)" if b["decision"] == "decline" else " (confirmed)" if b["decision"] == "confirm" else ""
         sub = f", {b['sub']}" if b["sub"] and b["sub"] != "protected" else ""
         lines.append(f"- {_fmt_h(b['start'])}-{_fmt_h(b['end'])} {b['title']} [{kind}{status}]{sub}")
-    day = rules.demo_day()
+    if day.all_day:
+        lines.append("All day: " + "; ".join(day.all_day))
     if day.deadline:
         d = day.deadline
         est = f", about {d['estimate_h']:g} h of work" if d.get("estimate_h") else ""
@@ -66,7 +68,7 @@ _TRAINING_BLOCK = re.compile(r"\b(run|lift|climb|hike|workout|ride|swim|gym|stre
 
 
 def _training_answer(now: datetime) -> str:
-    state = rules.decide(rules.demo_day(), db.decisions(now.date().isoformat()), now)
+    state = rules.decide(rules.today_day(now), db.decisions(now.date().isoformat()), now)
     plan = [b for b in state["blocks"] if _TRAINING_BLOCK.search(f"{b['title']} {b['sub']}")
             and b["decision"] != "decline"]
     lead = "Training calls aren't made on-device; they come from the weekly plan."

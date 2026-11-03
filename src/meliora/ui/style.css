@@ -23,6 +23,7 @@
 }
 
 *{box-sizing:border-box}
+[hidden]{display:none !important}
 /* clip, not hidden: hidden boxes can still be scrolled by focus, which shoved the page sideways
    when the Ask drawer slid out with its text box focused. */
 html,body{margin:0;height:100%;overflow:clip}
@@ -242,3 +243,4 @@ nav{display:flex;flex-direction:column;gap:2px}
 
 @media (max-width:1180px){ .center{grid-template-columns:minmax(0,1fr) 330px} .sentence{font-size:36px} .bodyv{grid-template-columns:256px minmax(0,1fr)} }
 @media (prefers-reduced-motion:reduce){ .rib,.stars svg{animation:none} .drawer{transition:none} }
+.allday{flex:1;margin-left:10px;font-size:11.5px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}

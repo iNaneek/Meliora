@@ -114,6 +114,18 @@ CREATE TABLE IF NOT EXISTS source_sync (
     last_try TEXT,
     detail   TEXT
 );
+-- Apple Calendar events (read through EventKit). The window is replaced on each refresh.
+CREATE TABLE IF NOT EXISTS events (
+    id        TEXT NOT NULL,               -- EventKit id + start, so each repeat of a series is its own row
+    calendar  TEXT,
+    title     TEXT,
+    start     TEXT NOT NULL,               -- local time, ISO
+    end       TEXT NOT NULL,
+    all_day   INTEGER NOT NULL DEFAULT 0,
+    location  TEXT,
+    PRIMARY KEY (id)
+);
+CREATE INDEX IF NOT EXISTS events_start ON events (start);
 -- Every model call (local or Claude): what it was for, how long, how many tokens.
 CREATE TABLE IF NOT EXISTS llm_calls (
     at         TEXT NOT NULL,
