@@ -48,7 +48,6 @@
     var demo = s.source !== 'calendar';
     $('tag-demo').hidden = !demo; $('reset').hidden = !demo;
     $('allday').textContent = s.all_day && s.all_day.length ? 'All day: ' + s.all_day.join(' · ') : '';
-    if (!demo && !s.blocks.length) $('rows').innerHTML = '<div class="row past"><span class="tm"></span><span><b>Nothing on your calendar today</b></span></div>';
   }
 
   function renderNext(n) {
@@ -62,19 +61,67 @@
     el.dataset.id = (state.blocks.filter(function (b) { return b.title === n.what; })[0] || {}).id || '';
   }
 
+  // ---------- day timeline ----------
+  // A time grid, 7a–10p by default. It grows to the hour when an event starts earlier or
+  // ends later, so a 6 am lift or an 11 pm call still shows without a mostly empty midnight grid.
+  var DAY_START = 7, DAY_END = 22, MIN_HOUR_PX = 30, scrolledToNow = false;
+
+  function hourLabel(h) { var hh = h % 24; return ((hh + 11) % 12 + 1) + (hh < 12 ? 'a' : 'p'); }
+
+  // Side-by-side columns for overlapping blocks: each run of overlaps shares the width.
+  function layout(blocks) {
+    var sorted = blocks.slice().sort(function (a, b) { return a.start - b.start || b.end - a.end; });
+    var out = [], cluster = [], cols = [], clusterEnd = -1;
+    function flush() { cluster.forEach(function (c) { c.cols = cols.length; }); cluster = []; cols = []; }
+    sorted.forEach(function (b) {
+      if (b.start >= clusterEnd) { flush(); clusterEnd = -1; }
+      var col = cols.findIndex(function (end) { return end <= b.start; });
+      if (col < 0) { col = cols.length; cols.push(0); }
+      cols[col] = b.end;
+      var item = { b: b, col: col, cols: 1 };
+      cluster.push(item); out.push(item);
+      clusterEnd = Math.max(clusterEnd, b.end);
+    });
+    flush();
+    return out;
+  }
+
   function renderRows(s) {
-    $('rows').innerHTML = s.blocks.map(function (b) {
-      var cls = 'row ' + b.kind;
+    var lo = DAY_START, hi = DAY_END;
+    s.blocks.forEach(function (b) { lo = Math.min(lo, Math.floor(b.start)); hi = Math.max(hi, Math.ceil(b.end)); });
+    lo = Math.max(0, lo); hi = Math.min(24, hi);
+    var span = hi - lo, pct = function (h) { return ((h - lo) / span * 100).toFixed(3) + '%'; };
+    var wrap = $('rows'), hourPx = Math.max(MIN_HOUR_PX, (wrap.clientHeight - 12) / span);
+    var html = '';
+    for (var h = lo; h <= hi; h++) {
+      html += '<div class="hr" style="top:' + pct(h) + '"><span>' + (h < hi ? hourLabel(h) : '') + '</span></div>';
+    }
+    layout(s.blocks).forEach(function (it) {
+      var b = it.b, dur = b.end - b.start, cls = 'ev ' + b.kind;
       if (b.decision === 'decline') cls += ' declined';
       else if (b.start <= s.now && s.now < b.end) cls += ' now';
       else if (b.end <= s.now) cls += ' past';
+      var px = dur * hourPx;  // how much fits: one line, two lines, or title + time + place
+      cls += px < 30 ? ' s' : px < 50 ? ' m' : '';
       var acts = '';
       if (b.kind === 'pen') acts = b.decision === 'decline'
         ? '<span class="pa"><button data-act="undo">Undo</button></span>'
         : '<span class="pa"><button class="y" data-act="confirm">Confirm</button><button data-act="decline">Decline</button></span>';
-      return '<div class="' + cls + '" data-id="' + b.id + '"><span class="tm">' + fmt(b.start) + '</span>' +
-        '<span><b>' + esc(b.title) + '</b><span class="sub">' + esc(b.sub) + '</span></span>' + acts + '</div>';
-    }).join('');
+      var when = fmt(b.start) + '–' + fmt(b.end);
+      var style = 'top:' + pct(Math.max(b.start, lo)) + ';height:calc(' + pct(Math.min(b.end, hi)) + ' - ' + pct(Math.max(b.start, lo)) + ' - 2px);' +
+        'left:calc((100% - 44px) * ' + (it.col / it.cols) + ' + 44px);width:calc((100% - 44px) / ' + it.cols + ' - 3px)';
+      html += '<div class="' + cls + '" data-id="' + b.id + '" style="' + style + '" title="' + esc(b.title + ' · ' + when + (b.sub ? ' · ' + b.sub : '')) + '">' +
+        '<b>' + esc(b.title) + '</b><span class="tm">' + when + '</span>' +
+        (b.sub ? '<span class="sub">' + esc(b.sub) + '</span>' : '') + acts + '</div>';
+    });
+    if (s.now >= lo && s.now <= hi) html += '<div class="nowline" style="top:' + pct(s.now) + '"></div>';
+    if (s.source === 'calendar' && !s.blocks.length) html += '<div class="tl-empty">Nothing on your calendar today</div>';
+    wrap.innerHTML = '<div class="tl" style="--span:' + span + '">' + html + '</div>';
+    // When the grid is taller than the panel, open it at the current hour once.
+    if (!scrolledToNow && wrap.scrollHeight > wrap.clientHeight + 4) {
+      scrolledToNow = true;
+      wrap.scrollTop = Math.max(0, (s.now - lo - 1) / span * wrap.scrollHeight);
+    }
   }
 
   // ---------- actions → Python ----------

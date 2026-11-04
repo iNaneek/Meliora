@@ -103,24 +103,39 @@ nav{display:flex;flex-direction:column;gap:2px}
 .next .acts{display:flex;gap:8px;margin-top:14px}
 .fading{opacity:0}
 
-.agenda{display:flex;flex-direction:column;min-height:0;padding:14px 10px 10px;align-self:start;max-height:100%}
+.agenda{display:flex;flex-direction:column;min-height:0;padding:14px 10px 10px;align-self:stretch;margin-bottom:12px}
 .agenda-h{display:flex;justify-content:space-between;align-items:baseline;padding:0 8px 8px}
 .agenda-h h3{margin:0;font-size:11px;letter-spacing:1px;text-transform:uppercase;color:var(--muted)}
 .tag-demo{font-size:9.5px;letter-spacing:.6px;text-transform:uppercase;color:var(--faint);border:1px dashed var(--faint);border-radius:5px;padding:0 5px}
-.rows{overflow:auto;display:flex;flex-direction:column;gap:4px}
-.row{display:grid;grid-template-columns:46px minmax(0,1fr) auto;gap:8px;align-items:center;padding:7px 9px;border-radius:10px;border:1px solid transparent;position:relative}
-.row .tm{font-family:var(--mono);font-size:11px;color:var(--muted)}
-.row b{font-weight:600;display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.row .sub{font-size:11px;color:var(--muted);display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.row.ink{background:var(--glass-2);box-shadow:inset 3px 0 0 var(--accent)}
-.row.prot{opacity:.62}
-.row.rest{background:var(--glass-2);box-shadow:inset 3px 0 0 var(--rest)}
-.row.pen{background:var(--pen-soft);border:1.5px dashed var(--pen)}
-.row.pen .tm{color:var(--pen)}
-.row.past{opacity:.45}
-.row.now{box-shadow:inset 3px 0 0 var(--now);background:var(--glass-2)}
-.row.now::after{content:"now";position:absolute;right:8px;top:-7px;font-size:9px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:#fff;background:var(--now);border-radius:4px;padding:0 4px}
-.row.declined{opacity:.4;border-style:dotted}
+/* Day timeline: positions are % of the grid, so it fills the panel; past ~22 h it scrolls. */
+.rows{flex:1;min-height:0;overflow:auto;padding:6px 2px 6px 0}
+.tl{position:relative;height:max(100%, calc(var(--span) * 30px))}
+.hr{position:absolute;left:0;right:0;height:0;border-top:1px solid var(--gridc)}
+.hr span{position:absolute;left:4px;top:-7px;width:34px;font-family:var(--mono);font-size:10px;color:var(--faint);text-align:right}
+.ev{position:absolute;overflow:hidden;border-radius:8px;padding:4px 8px;border:1px solid transparent;display:flex;flex-direction:column;gap:1px;min-height:14px}
+.ev>*{flex-shrink:0}
+.ev b{font-weight:600;font-size:12px;line-height:1.25;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ev .tm{font-family:var(--mono);font-size:10.5px;color:var(--muted);white-space:nowrap}
+.ev .sub{font-size:11px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ev.m{flex-direction:row;align-items:center;column-gap:8px}
+.ev.s{flex-direction:row;align-items:center;gap:8px;padding:0 8px}
+.ev.s .sub,.ev.m .sub{display:none}
+.ev.ink{background:var(--glass-2);box-shadow:inset 3px 0 0 var(--accent)}
+.ev.prot{background:var(--glass-2);opacity:.62}
+.ev.rest{background:var(--glass-2);box-shadow:inset 3px 0 0 var(--rest)}
+.ev.pen{background:var(--pen-soft);border:1.5px dashed var(--pen)}
+.ev.pen .tm{color:var(--pen)}
+.ev.past{opacity:.45}
+.ev.now{box-shadow:inset 3px 0 0 var(--now);background:var(--glass-2)}
+.ev.declined{opacity:.4;border-style:dotted}
+.ev .pa{position:absolute;top:3px;right:5px}
+.ev.s .pa{top:50%;transform:translateY(-50%)}
+.ev.pen b{padding-right:128px}
+.ev.m.pen,.ev.s.pen{padding-right:134px;align-items:center}
+.ev.m.pen b,.ev.s.pen b{padding-right:0}
+.nowline{position:absolute;left:40px;right:0;height:0;border-top:2px solid var(--now);z-index:2;pointer-events:none}
+.nowline::before{content:"";position:absolute;left:-4px;top:-5px;width:8px;height:8px;border-radius:50%;background:var(--now)}
+.tl-empty{position:absolute;left:44px;right:0;top:40%;text-align:center;color:var(--muted);font-size:12px}
 .pa{display:flex;gap:4px}
 .pa button{border:1px solid var(--pen);background:none;color:var(--pen);border-radius:6px;padding:1px 7px;font-size:11px}
 .pa button.y{background:var(--pen);color:var(--accent-ink)}
@@ -244,3 +259,5 @@ nav{display:flex;flex-direction:column;gap:2px}
 @media (max-width:1180px){ .center{grid-template-columns:minmax(0,1fr) 330px} .sentence{font-size:36px} .bodyv{grid-template-columns:256px minmax(0,1fr)} }
 @media (prefers-reduced-motion:reduce){ .rib,.stars svg{animation:none} .drawer{transition:none} }
 .allday{flex:1;margin-left:10px;font-size:11.5px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+/* One-line blocks: the title gives way (ellipsis) so the time always fits. */
+.ev.m b,.ev.s b{flex-shrink:1;min-width:0}
