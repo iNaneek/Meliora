@@ -234,6 +234,8 @@ def answer_claude(question: str, history: list[dict], tier: str = "sonnet") -> d
     try:
         data, info = llm.claude_json("ask", CLAUDE_SYSTEM.format(context=claude_context(now)), user,
                                      CLAUDE_SCHEMA, tier)
+    except llm.Stopped:
+        return {"ok": False, "stopped": True, "text": "Stopped."}
     except llm.Unavailable as e:
         return {"ok": False, "text": f"Claude couldn't answer ({e}). Offline? The on-device models still work."}
     events = proposals.add(proposals.clean(data.get("events"), now), info["model"])

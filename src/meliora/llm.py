@@ -246,6 +246,34 @@ def warm(tier: str = "fast") -> None:
 # Each call is one stateless question: no tools, no saved session, no CLAUDE.md or
 # settings loaded, so the prompt is only what Meliora sends.
 
+class Stopped(Unavailable):
+    """The Stop button ended the call."""
+
+
+_claude_lock = threading.Lock()
+_claude_proc: subprocess.Popen | None = None
+
+
+def stop_claude() -> bool:
+    """Kill the running `claude -p`, if any. Tokens it already used still count."""
+    with _claude_lock:
+        proc = _claude_proc
+    if proc and proc.poll() is None:
+        proc.kill()
+        return True
+    return False
+
+
+def claude_usage() -> dict:
+    """Claude tokens (in + out) from the call log: today and the last 7 days."""
+    with db.session() as conn:
+        q = ("SELECT COALESCE(SUM(COALESCE(tokens_in, 0) + COALESCE(tokens_out, 0)), 0), COUNT(*)"
+             " FROM llm_calls WHERE backend = 'claude' AND at >= ?")
+        today = conn.execute(q, (time.strftime("%Y-%m-%d"),)).fetchone()
+        week = conn.execute(q, (time.strftime("%Y-%m-%d", time.localtime(time.time() - 6 * 86400)),)).fetchone()
+    return {"today": today[0], "today_calls": today[1], "week": week[0], "week_calls": week[1]}
+
+
 def claude_bin() -> str | None:
     """`claude` from config, PATH, the usual install spots, or the VS Code extension."""
     s = config.load().get("models", {}).get("claude_bin")
@@ -285,12 +313,27 @@ def claude_json(task: str, system: str, user: str, schema: dict, tier: str = "so
     cmd = [exe, "-p", "--model", alias, "--output-format", "json", "--tools", "",
            "--no-session-persistence", "--setting-sources", "", "--strict-mcp-config",
            "--system-prompt", system, "--json-schema", json.dumps(schema)]
+    global _claude_proc
+    with _claude_lock:
+        proc = _claude_proc = subprocess.Popen(cmd, stdin=subprocess.PIPE, stdout=subprocess.PIPE,
+                                               stderr=subprocess.PIPE, text=True, cwd=cwd, env=env)
     try:
-        r = subprocess.run(cmd, input=user, capture_output=True, text=True, timeout=timeout, cwd=cwd, env=env)
-        out = json.loads(r.stdout) if r.stdout.strip() else {}
+        stdout, stderr = proc.communicate(user, timeout=timeout)
     except subprocess.TimeoutExpired as e:
+        proc.kill()
+        proc.communicate()
         _log(alias, task, ms(), None, None, False, "timeout", "claude")
         raise Unavailable("Claude took too long") from e
+    finally:
+        with _claude_lock:
+            if _claude_proc is proc:
+                _claude_proc = None
+    if proc.returncode < 0:  # killed by stop_claude()
+        _log(alias, task, ms(), None, None, False, "stopped", "claude")
+        raise Stopped()
+    r = subprocess.CompletedProcess(cmd, proc.returncode, stdout, stderr)
+    try:
+        out = json.loads(r.stdout) if r.stdout.strip() else {}
     except ValueError:
         out = {}
     usage = out.get("modelUsage") or {}

@@ -171,6 +171,8 @@ nav{display:flex;flex-direction:column;gap:2px}
 .m.u{align-self:flex-end;background:var(--accent);color:var(--accent-ink)}
 .m.a{background:var(--glass-2)}
 .compose{margin:12px;border:1px solid var(--edge);border-radius:10px;display:flex}
+.compose .stop{margin:4px;border:1px solid var(--edge);background:var(--glass-2);border-radius:7px;padding:0 12px;font-size:12px;color:var(--ink)}
+.usage{font-family:var(--mono);font-size:10.5px;color:var(--faint);white-space:nowrap}
 .compose input{flex:1;border:0;background:none;font:inherit;color:inherit;padding:9px 11px;outline:none}
 
 /* ---------- sky scrubber (sidebar) ---------- */

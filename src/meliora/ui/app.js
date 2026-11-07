@@ -204,7 +204,7 @@
     var state = p.status === 'added' ? '<span class="state">In your Meliora calendar</span>'
       : p.status === 'skipped' ? '<span class="state">Skipped</span>'
       : '<span class="pa"><button class="y" data-prop="add">Add to calendar</button><button data-prop="skip">Skip</button></span>';
-    return '<div class="prop ' + (p.status || 'pending') + '" data-pid="' + p.id + '"><b>' + esc(p.title) + '</b><span class="when">' + esc(propWhen(p)) + '</span>' +
+    return '<div class="prop ' + (p.status === 'pending' || !p.status ? 'open' : p.status) + '" data-pid="' + p.id + '"><b>' + esc(p.title) + '</b><span class="when">' + esc(propWhen(p)) + '</span>' +
       (p.location ? '<span class="where"> · ' + esc(p.location) + '</span>' : '') + state + '</div>';
   }
   $('msgs').addEventListener('click', function (e) {
@@ -220,25 +220,48 @@
   $('ask').onclick = function () {
     var open = $('drawer').classList.toggle('open');
     if (!open && document.activeElement) document.activeElement.blur();
-    if (open && api) api.chat_models().then(function (list) { renderTiers(list); api.chat_warm(tier); });
+    if (open && api) { api.chat_models().then(function (list) { renderTiers(list); api.chat_warm(tier); }); renderUsage(); }
     setTimeout(function () { $('q').focus(); }, 220);
   };
   $('close').onclick = function () { document.activeElement && document.activeElement.blur(); $('drawer').classList.remove('open'); };
+  // Each question owns its reply bubble, so a late or stopped answer can't land in the wrong place.
+  var reqId = 0;
+  function fmtK(n) { return n >= 1000 ? (n / 1000).toFixed(1) + 'k' : String(n); }
+  function renderUsage() {
+    if (!api) return;
+    api.claude_usage().then(function (u) {
+      $('usage').textContent = u.today_calls ? 'Claude today ' + fmtK(u.today) + ' tok' : '';
+      $('usage').title = 'Claude tokens (prompt + reply): ' + fmtK(u.today) + ' today in ' + u.today_calls +
+        ' calls, ' + fmtK(u.week) + ' in the last 7 days in ' + u.week_calls + ' calls';
+    });
+  }
+  function setAsking(on) { asking = on; $('stop').hidden = !on; }
+  $('stop').onclick = function () {
+    if (!asking) return;
+    var id = reqId, bubble = $('msgs').querySelector('[data-req="' + id + '"]');
+    reqId++;  // the answer, if it still arrives, belongs to no one
+    if (bubble) { bubble.classList.remove('pending'); bubble.classList.add('err'); bubble.textContent = 'Stopped.'; }
+    setAsking(false);
+    api.ask_stop().then(renderUsage);
+    $('q').focus();
+  };
   $('compose').onsubmit = function (e) {
     e.preventDefault(); var q = $('q').value.trim(); if (!q || !api || asking) return;
-    var msgs = $('msgs');
-    msgs.insertAdjacentHTML('beforeend', '<div class="m u">' + esc(q) + '</div><div class="m a pending">' + (claudeTiers[tier] ? 'Asking Claude…' : 'Thinking…') + '</div>');
+    var msgs = $('msgs'), id = ++reqId, isClaude = !!claudeTiers[tier];
+    msgs.insertAdjacentHTML('beforeend', '<div class="m u">' + esc(q) + '</div><div class="m a pending" data-req="' + id + '">' +
+      (isClaude ? 'Asking Claude…' : 'Thinking…') + '</div>');
+    var p = msgs.querySelector('[data-req="' + id + '"]');
     msgs.scrollTop = 1e6;
-    $('q').value = ''; asking = true;
+    $('q').value = ''; setAsking(true);
     api.ask(q, tier, history.slice(-8)).then(function (r) {
-      var p = msgs.querySelector('.pending');
+      if (id !== reqId) return;  // stopped
       p.classList.remove('pending');
       p.textContent = r.text;
       if (!r.ok) p.classList.add('err');
       else {
         history.push({ role: 'user', content: q }, { role: 'assistant', content: r.text });
         var by = r.model === 'rules' ? 'from the plan, no model' : r.model + ' · ' + (r.ms / 1000).toFixed(1) + ' s';
-        if (r.backend === 'claude' && r.tokens_in) by += ' · ' + ((r.tokens_in + (r.tokens_out || 0)) / 1000).toFixed(1) + 'k tokens';
+        if (r.backend === 'claude' && r.tokens_in) by += ' · ' + fmtK(r.tokens_in + (r.tokens_out || 0)) + ' tokens';
         p.insertAdjacentHTML('beforeend', '<span class="by">' + esc(by) + '</span>');
         if (r.proposals && r.proposals.length) {
           p.insertAdjacentHTML('afterend', r.proposals.map(propCard).join(''));
@@ -247,8 +270,12 @@
       }
       msgs.scrollTop = 1e6;
     }).catch(function (err) {
-      var p = msgs.querySelector('.pending'); p.classList.remove('pending'); p.classList.add('err'); p.textContent = 'Error: ' + err;
-    }).then(function () { asking = false; });
+      if (id !== reqId) return;
+      p.classList.remove('pending'); p.classList.add('err'); p.textContent = 'Error: ' + err;
+    }).then(function () {
+      if (id === reqId) setAsking(false);
+      if (isClaude) renderUsage();
+    });
   };
 
   // Per-source "last synced". Stale is shown, not hidden: the app keeps working on the cache.

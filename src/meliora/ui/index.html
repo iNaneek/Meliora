@@ -125,6 +125,7 @@
     <aside class="drawer glass" id="drawer" aria-label="Ask">
       <div class="dh">
         <b>Ask</b>
+        <span class="usage" id="usage" title="Claude tokens used (prompt + reply), from the call log"></span>
         <button class="btn ghost" id="close">Close</button>
       </div>
       <div class="pick">
@@ -134,7 +135,7 @@
       <div class="msgs" id="msgs">
         <div class="m a" id="hello"></div>
       </div>
-      <form class="compose" id="compose"><input id="q" placeholder="Ask about your day…" autocomplete="off"></form>
+      <form class="compose" id="compose"><input id="q" placeholder="Ask about your day…" autocomplete="off"><button type="button" class="stop" id="stop" hidden>Stop</button></form>
     </aside>
 
   <div class="toast" id="toast"></div>

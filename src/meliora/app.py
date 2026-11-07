@@ -91,6 +91,13 @@ class Api:
             tier = "fast"
         return chat.answer(str(text)[:2000], history or [], tier)
 
+    def ask_stop(self) -> bool:
+        """The Stop button. Ends a Claude call; an on-device answer just gets ignored (it's free)."""
+        return llm.stop_claude()
+
+    def claude_usage(self) -> dict:
+        return llm.claude_usage()
+
     def chat_models(self) -> list:
         return llm.tiers() + llm.claude_tiers()
 
