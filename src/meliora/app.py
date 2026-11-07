@@ -102,18 +102,26 @@ class Api:
         return llm.tiers() + llm.claude_tiers()
 
     def proposal(self, pid: int, action: str) -> dict:
-        """Confirm ("add") writes the event to the Meliora calendar; "skip" drops it."""
+        """Confirm ("add") carries the proposal out: a new event goes to the Meliora calendar,
+        or a delete removes the event. "skip" drops it."""
         pid = int(pid)
         if action == "skip":
-            return {"ok": True, "proposal": proposals.skip(pid), "msg": "Skipped. Nothing was added."}
+            p = proposals.skip(pid)
+            return {"ok": True, "proposal": p,
+                    "msg": "Kept. Nothing was deleted." if p.get("action") == "delete" else "Skipped. Nothing was added."}
         try:
             p = proposals.confirm(pid)
-        except PermissionError:
-            return {"ok": False, "proposal": proposals.get(pid),
-                    "msg": "Connect Calendar first (sidebar), then confirm again."}
+        except PermissionError as e:
+            msg = str(e) if "read-only" in str(e) else "Connect Calendar first (sidebar), then confirm again."
+            return {"ok": False, "proposal": proposals.get(pid), "msg": msg}
+        except LookupError as e:
+            proposals.skip(pid)
+            return {"ok": False, "proposal": proposals.get(pid), "msg": f"{e}. Nothing to delete."}
         except Exception as e:
             logging.exception("adding proposal %s failed", pid)
             return {"ok": False, "proposal": proposals.get(pid), "msg": f"Calendar didn't take it: {e}"[:200]}
+        if p["action"] == "delete":
+            return {"ok": True, "proposal": p, "msg": f"Deleted {p['title']} from {p['calendar']}."}
         return {"ok": True, "proposal": p, "msg": f"Added to your Meliora calendar: {p['title']}."}
 
     def chat_warm(self, tier: str = "fast") -> None:

@@ -41,7 +41,7 @@ def briefing(now: datetime | None = None) -> str:
         lines.append(f"Next up: {nxt['what']} ({nxt['label']})")
     lines.append("Today's schedule:")
     for b in state["blocks"]:
-        kind = {"ink": "ink", "pen": "pencil", "prot": "protected", "rest": "rest"}.get(b["kind"], b["kind"])
+        kind = {"ink": "ink", "pen": "pencil", "prot": "protected", "rest": "rest", "del": "ink, proposed for deletion"}.get(b["kind"], b["kind"])
         status = " (declined)" if b["decision"] == "decline" else " (confirmed)" if b["decision"] == "confirm" else ""
         sub = f", {b['sub']}" if b["sub"] and b["sub"] != "protected" else ""
         lines.append(f"- {_fmt_h(b['start'])}-{_fmt_h(b['end'])} {b['title']} [{kind}{status}]{sub}")
@@ -123,9 +123,10 @@ How to answer:
 Calendar events:
 - You can propose events by putting them in "events" (local time, ISO 8601 without a time zone, e.g. 2026-11-08T07:00). Use "location" only if known, else "".
 - Propose events only when he asks you to add or schedule something, or clearly says yes to a suggestion. Otherwise "events" is [].
-- Proposals are pencil: they show up dashed with Confirm / Skip, and nothing is added to his calendar until he confirms. Say so briefly in "reply" ("Proposed ..., confirm it below.") and never claim it's already added.
+- Adds and deletes are pencil: they show up dashed with Confirm / Skip, and nothing is added to his calendar until he confirms. Say so briefly in "reply" ("Proposed ..., confirm it below.") and never claim it's already added.
 - Avoid overlapping existing events unless he asks for that time. If something is in the way, mention it and pick the nearest free slot. If the request is too vague to place (no day or length), ask instead of guessing.
-- You can't move or delete existing events yet; say so if asked.
+- You can propose deleting existing events by putting their [ref] (e.g. "e12") in "delete". Only events with a ref can be deleted; ones marked read-only can't (he'd delete those in Calendar). Deleting a repeating event removes only that day.
+- Propose a delete only when he asks to remove, cancel or move something. To move an event, delete it and add the new time. Deletes are pencil too: say "confirm below", never that it's gone.
 
 {context}"""
 
@@ -133,13 +134,14 @@ CLAUDE_SCHEMA = {
     "type": "object",
     "properties": {
         "reply": {"type": "string"},
+        "delete": {"type": "array", "items": {"type": "string"}},
         "events": {"type": "array", "items": {
             "type": "object",
             "properties": {"title": {"type": "string"}, "start": {"type": "string"}, "end": {"type": "string"},
                            "location": {"type": "string"}},
             "required": ["title", "start", "end"]}},
     },
-    "required": ["reply", "events"],
+    "required": ["reply", "events", "delete"],
 }
 
 
@@ -147,11 +149,15 @@ def _clock(dt: datetime) -> str:
     return dt.strftime("%-I:%M %p").lower()
 
 
-def calendar_lines(now: datetime) -> list[str]:
+def calendar_lines(now: datetime, refs: dict | None = None) -> list[str]:
+    """One line per event. Editable events get a [ref] the model can name to delete them;
+    `refs` is filled with ref -> event row."""
     if not calendars.connected():
         return ["(Apple Calendar isn't connected; only today's demo plan above is known.)"]
+    refs = {} if refs is None else refs
     events = calendars.range_events(now.date(), CAL_DAYS)
-    pend = proposals.pending()
+    pend = proposals.pending(action="add")
+    deleting = {p["target"] for p in proposals.pending(action="delete")}
     out = []
     for i in range(CAL_DAYS):
         d = now.date() + timedelta(days=i)
@@ -162,10 +168,20 @@ def calendar_lines(now: datetime) -> list[str]:
             if not (s < lo + timedelta(days=1) and en > lo):
                 continue
             where = ", ".join(" ".join(x.split()) for x in (e["calendar"], e["location"]) if x)
-            if e["all_day"]:
-                items.append(f"  all day: {e['title']} ({where})")
+            if e["id"] in deleting:
+                tag = "PROPOSED FOR DELETION, not confirmed yet"
+            elif e["editable"] and s >= now - timedelta(hours=1):
+                ref = next((r for r, row in refs.items() if row["id"] == e["id"]), None)
+                if not ref:
+                    ref = f"e{len(refs) + 1}"
+                    refs[ref] = e
+                tag = ref
             else:
-                items.append(f"  {_clock(s)}-{_clock(en)} {e['title']} ({where})")
+                tag = "read-only" if not e["editable"] else "past"
+            if e["all_day"]:
+                items.append(f"  [{tag}] all day: {e['title']} ({where})")
+            else:
+                items.append(f"  [{tag}] {_clock(s)}-{_clock(en)} {e['title']} ({where})")
         for p in pend:
             s, en = datetime.fromisoformat(p["start"]), datetime.fromisoformat(p["end"])
             if s.date() == d:
@@ -219,10 +235,10 @@ def body_lines() -> list[str]:
     return out
 
 
-def claude_context(now: datetime | None = None) -> str:
+def claude_context(now: datetime | None = None, refs: dict | None = None) -> str:
     now = now or datetime.now()
-    return "\n".join(["## Today", briefing(now), "", "## Calendar, next 7 days", *calendar_lines(now),
-                      "", "## Body", *body_lines()])
+    return "\n".join(["## Today", briefing(now), "", "## Calendar, next 7 days ([ref] = can be deleted)",
+                      *calendar_lines(now, refs), "", "## Body", *body_lines()])
 
 
 def answer_claude(question: str, history: list[dict], tier: str = "sonnet") -> dict:
@@ -231,13 +247,16 @@ def answer_claude(question: str, history: list[dict], tier: str = "sonnet") -> d
     turns = [m for m in history if m.get("role") in ("user", "assistant") and m.get("content")][-CLAUDE_TURNS:]
     convo = "".join(f"{'Keenan' if m['role'] == 'user' else 'Meliora'}: {m['content']}\n" for m in turns)
     user = (f"Earlier in this conversation:\n{convo}\nNew message from Keenan: " if convo else "") + question
+    refs: dict = {}
     try:
-        data, info = llm.claude_json("ask", CLAUDE_SYSTEM.format(context=claude_context(now)), user,
+        data, info = llm.claude_json("ask", CLAUDE_SYSTEM.format(context=claude_context(now, refs)), user,
                                      CLAUDE_SCHEMA, tier)
     except llm.Stopped:
         return {"ok": False, "stopped": True, "text": "Stopped."}
     except llm.Unavailable as e:
         return {"ok": False, "text": f"Claude couldn't answer ({e}). Offline? The on-device models still work."}
-    events = proposals.add(proposals.clean(data.get("events"), now), info["model"])
+    targets = [refs[r] for r in dict.fromkeys(str(x).strip("[] ") for x in data.get("delete") or []) if r in refs]
+    events = (proposals.add_deletes(targets, info["model"])
+              + proposals.add(proposals.clean(data.get("events"), now), info["model"]))
     text = str(data.get("reply") or "").strip() or ("Proposed below." if events else "(No answer.)")
     return {"ok": True, "text": text, "proposals": events, "backend": "claude", **info}

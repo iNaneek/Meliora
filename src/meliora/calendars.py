@@ -95,13 +95,15 @@ def refresh(force: bool = False) -> int | None:
             if cal in skip:
                 continue
             s, e = _dt(ev.startDate()), _dt(ev.endDate())
+            editable = bool(ev.calendar() and ev.calendar().allowsContentModifications())
             rows.append((f"{ev.eventIdentifier()}@{s.isoformat()}", cal, ev.title() or "(no title)",
                          s.isoformat(timespec="minutes"), e.isoformat(timespec="minutes"),
-                         int(bool(ev.isAllDay())), ev.location() or ""))
+                         int(bool(ev.isAllDay())), ev.location() or "", int(editable)))
         with db.session() as conn:
             conn.execute("DELETE FROM events WHERE start >= ? AND start < ?",
                          (start.isoformat(), end.isoformat()))
-            conn.executemany("INSERT OR REPLACE INTO events VALUES (?, ?, ?, ?, ?, ?, ?)", rows)
+            conn.executemany("INSERT OR REPLACE INTO events (id, calendar, title, start, end, all_day, location, editable)"
+                             " VALUES (?, ?, ?, ?, ?, ?, ?, ?)", rows)
             db.mark_sync(conn, SOURCE, True, f"{len(rows)} events")
         _last_refresh = datetime.now()
         log.info("calendar: %d events", len(rows))
@@ -155,15 +157,41 @@ def add_event(title: str, start: datetime, end: datetime, location: str = "", no
         return ev.eventIdentifier()
 
 
+def delete_event(row_id: str) -> None:
+    """Remove one occurrence (events.id = "<EventKit id>@<start>") from its calendar. A repeating
+    event loses only that day. Call only after a Confirm."""
+    if status() != "granted":
+        raise PermissionError("Calendar isn't connected")
+    ek_id, _, start_s = row_id.rpartition("@")
+    start = datetime.fromisoformat(start_s)
+    ek = _ek()
+    from Foundation import NSDate
+
+    with _lock:
+        store = ek.EKEventStore.alloc().init()
+        pred = store.predicateForEventsWithStartDate_endDate_calendars_(
+            NSDate.dateWithTimeIntervalSince1970_((start - timedelta(minutes=1)).timestamp()),
+            NSDate.dateWithTimeIntervalSince1970_((start + timedelta(days=1)).timestamp()), None)
+        match = next((ev for ev in store.eventsMatchingPredicate_(pred) or []
+                      if ev.eventIdentifier() == ek_id and abs(_dt(ev.startDate()) - start) < timedelta(minutes=1)), None)
+        if match is None:
+            raise LookupError("That event isn't on the calendar anymore")
+        if not (match.calendar() and match.calendar().allowsContentModifications()):
+            raise PermissionError(f"{match.calendar().title()} is read-only; delete it in Calendar")
+        ok, err = store.removeEvent_span_commit_error_(match, ek.EKSpanThisEvent, True, None)
+        if not ok:
+            raise RuntimeError(f"Calendar didn't delete it: {err}")
+
+
 def range_events(start: date, days: int) -> list[dict]:
     """Events overlapping [start, start + days), from SQLite, oldest first."""
     lo = datetime.combine(start, datetime.min.time())
     hi = lo + timedelta(days=days)
     with db.session() as conn:
         rows = conn.execute(
-            "SELECT id, calendar, title, start, end, all_day, location FROM events"
+            "SELECT id, calendar, title, start, end, all_day, location, editable FROM events"
             " WHERE start < ? AND end > ? ORDER BY start", (hi.isoformat(), lo.isoformat())).fetchall()
-    keys = ("id", "calendar", "title", "start", "end", "all_day", "location")
+    keys = ("id", "calendar", "title", "start", "end", "all_day", "location", "editable")
     return [dict(zip(keys, r)) for r in rows]
 
 

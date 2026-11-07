@@ -19,7 +19,7 @@ class Block:
     id: str
     start: float  # hours since midnight, e.g. 15.25 = 3:15 pm
     end: float
-    kind: str  # ink | pen | prot | rest
+    kind: str  # ink | pen | prot | rest | del (an event proposed for deletion)
     title: str
     sub: str
     where: str = ""
@@ -46,9 +46,11 @@ def demo_day() -> Day:
 
 def calendar_day(day: date) -> Day:
     """Today's Apple Calendar events as fixed (ink) blocks. Times are hours since midnight,
-    clipped to the day, so an event that started yesterday begins at 0."""
-    from meliora import calendars
+    clipped to the day, so an event that started yesterday begins at 0. An event a model
+    proposed deleting is drawn as a "del" block (its proposal's id) until confirmed or kept."""
+    from meliora import calendars, proposals
 
+    deleting = {p["target"]: p for p in proposals.pending(day, "delete")}
     midnight = datetime.combine(day, datetime.min.time())
     blocks, all_day = [], []
     for e in calendars.day_events(day):
@@ -60,8 +62,11 @@ def calendar_day(day: date) -> Day:
         if end <= start:
             continue
         bid = "ev-" + hashlib.sha1(e["id"].encode()).hexdigest()[:10]
-        blocks.append(Block(id=bid, start=start, end=end, kind="ink", title=e["title"],
-                            sub=e["location"] or e["calendar"], where=e["location"]))
+        kind, sub = "ink", e["location"] or e["calendar"]
+        if e["id"] in deleting:
+            p = deleting[e["id"]]
+            bid, kind, sub = f"prop-{p['id']}", "del", f"delete? proposed by {proposals.short_model(p['model'])}"
+        blocks.append(Block(id=bid, start=start, end=end, kind=kind, title=e["title"], sub=sub, where=e["location"]))
     return Day(blocks, None, {}, all_day, "calendar")
 
 
@@ -71,7 +76,7 @@ def proposal_blocks(day: date) -> list[Block]:
 
     midnight = datetime.combine(day, datetime.min.time())
     out = []
-    for p in proposals.pending(day):
+    for p in proposals.pending(day, "add"):
         start = max(0.0, (datetime.fromisoformat(p["start"]) - midnight).total_seconds() / 3600)
         end = min(24.0, (datetime.fromisoformat(p["end"]) - midnight).total_seconds() / 3600)
         sub = (p["location"] + " · " if p["location"] else "") + "proposed by " + proposals.short_model(p["model"])
@@ -160,7 +165,7 @@ def decide(day: Day, decisions: dict[str, str], now: datetime) -> dict:
         "blocks": [asdict(b) | {"decision": decisions.get(b.id, "")} for b in blocks],
         "job": {"done": day.job.get("done_h", 0), "target": day.job.get("target_h", 0),
                 "extra": 0 if job_state == "decline" or not job else job.hours, "state": job_state},
-        "pending": sum(1 for b in blocks if b.kind == "pen" and b.id not in decisions),
+        "pending": sum(1 for b in blocks if b.kind in ("pen", "del") and b.id not in decisions),
         "source": day.source,
         "all_day": day.all_day,
     }

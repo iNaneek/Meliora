@@ -104,7 +104,8 @@
       var px = dur * hourPx;  // how much fits: one line, two lines, or title + time + place
       cls += px < 30 ? ' s' : px < 50 ? ' m' : '';
       var acts = '';
-      if (b.kind === 'pen') acts = b.decision === 'decline'
+      if (b.kind === 'del') acts = '<span class="pa"><button class="y danger" data-act="confirm">Delete</button><button data-act="decline">Keep</button></span>';
+      else if (b.kind === 'pen') acts = b.decision === 'decline'
         ? '<span class="pa"><button data-act="undo">Undo</button></span>'
         : '<span class="pa"><button class="y" data-act="confirm">Confirm</button><button data-act="decline">Decline</button></span>';
       var when = fmt(b.start) + '–' + fmt(b.end);
@@ -201,11 +202,17 @@
     return day + ' · ' + clock(s) + '–' + clock(e);
   }
   function propCard(p) {
-    var state = p.status === 'added' ? '<span class="state">In your Meliora calendar</span>'
-      : p.status === 'skipped' ? '<span class="state">Skipped</span>'
+    var del = p.action === 'delete', state;
+    if (p.status === 'done') state = '<span class="state">' + (del ? 'Deleted from ' + esc(p.calendar || 'Calendar') : 'In your Meliora calendar') + '</span>';
+    else if (p.status === 'skipped') state = '<span class="state">' + (del ? 'Kept' : 'Skipped') + '</span>';
+    else state = del
+      ? '<span class="pa"><button class="y danger" data-prop="add">Delete</button><button data-prop="skip">Keep</button></span>'
       : '<span class="pa"><button class="y" data-prop="add">Add to calendar</button><button data-prop="skip">Skip</button></span>';
-    return '<div class="prop ' + (p.status === 'pending' || !p.status ? 'open' : p.status) + '" data-pid="' + p.id + '"><b>' + esc(p.title) + '</b><span class="when">' + esc(propWhen(p)) + '</span>' +
-      (p.location ? '<span class="where"> · ' + esc(p.location) + '</span>' : '') + state + '</div>';
+    var cls = 'prop ' + (del ? 'del ' : '') + (p.status === 'pending' || !p.status ? 'open' : p.status);
+    return '<div class="' + cls + '" data-pid="' + p.id + '">' + (del ? '<span class="kind">Delete</span>' : '') +
+      '<b>' + esc(p.title) + '</b><span class="when">' + esc(propWhen(p)) + '</span>' +
+      (del && p.calendar ? '<span class="where"> · ' + esc(p.calendar) + '</span>' : p.location ? '<span class="where"> · ' + esc(p.location) + '</span>' : '') +
+      state + '</div>';
   }
   $('msgs').addEventListener('click', function (e) {
     var b = e.target.closest('button[data-prop]'); if (!b || !api) return;
@@ -222,6 +229,12 @@
     if (!open && document.activeElement) document.activeElement.blur();
     if (open && api) { api.chat_models().then(function (list) { renderTiers(list); api.chat_warm(tier); }); renderUsage(); }
     setTimeout(function () { $('q').focus(); }, 220);
+  };
+  $('newchat').onclick = function () {
+    if (asking) { reqId++; setAsking(false); api && api.ask_stop(); }
+    history = [];
+    $('msgs').innerHTML = '<div class="m a" id="hello"></div>';
+    hello(); $('q').focus();
   };
   $('close').onclick = function () { document.activeElement && document.activeElement.blur(); $('drawer').classList.remove('open'); };
   // Each question owns its reply bubble, so a late or stopped answer can't land in the wrong place.

@@ -158,8 +158,20 @@ nav{display:flex;flex-direction:column;gap:2px}
 .prop .when{font-family:var(--mono);font-size:11px;color:var(--pen)}
 .prop .where{font-size:11px;color:var(--muted)}
 .prop .pa{margin-top:7px}
-.prop.added{border-style:solid;border-color:var(--accent);background:var(--glass-2)}
-.prop.added .when{color:var(--muted)}
+.prop .kind{display:block;font-size:9.5px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:var(--now)}
+.prop.del{border-color:var(--now);background:color-mix(in srgb,var(--now) 10%,transparent)}
+.prop.del.open b{text-decoration:line-through;text-decoration-color:var(--now)}
+.prop.del .when{color:var(--muted)}
+.prop.del.done{border-style:solid;opacity:.6}
+.pa button.y.danger{background:var(--now);border-color:var(--now);color:#fff}
+.ev.del{background:var(--glass-2);border:1.5px dashed var(--now)}
+.ev.del b{text-decoration:line-through;text-decoration-color:var(--now)}
+.ev.del .pa button:not(.y){border-color:var(--now);color:var(--now)}
+.ev.del b{padding-right:110px}
+.ev.m.del,.ev.s.del{padding-right:116px;align-items:center}
+.ev.m.del b,.ev.s.del b{padding-right:0}
+.prop.done{border-style:solid;border-color:var(--accent);background:var(--glass-2)}
+.prop.done .when{color:var(--muted)}
 .prop.skipped{opacity:.45;border-style:dotted}
 .prop .state{display:block;margin-top:6px;font-size:11px;color:var(--muted)}
 .seg button.missing{opacity:.45}

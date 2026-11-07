@@ -123,20 +123,25 @@ CREATE TABLE IF NOT EXISTS events (
     end       TEXT NOT NULL,
     all_day   INTEGER NOT NULL DEFAULT 0,
     location  TEXT,
+    editable  INTEGER NOT NULL DEFAULT 1,  -- 0: a read-only calendar (subscribed, holidays)
     PRIMARY KEY (id)
 );
 CREATE INDEX IF NOT EXISTS events_start ON events (start);
--- Calendar events a model proposed in Ask. Pencil until Keenan confirms; then it's written
--- to the "Meliora" calendar and event_id is its EventKit id.
+-- Calendar changes a model proposed in Ask. Pencil until Keenan confirms; then it's carried
+-- out: an add is written to the "Meliora" calendar (event_id is its EventKit id), a delete
+-- removes the event `target` (an events.id) from its calendar.
 CREATE TABLE IF NOT EXISTS proposals (
     id         INTEGER PRIMARY KEY AUTOINCREMENT,
+    action     TEXT NOT NULL DEFAULT 'add' CHECK (action IN ('add', 'delete')),
     title      TEXT NOT NULL,
     start      TEXT NOT NULL,              -- local time, ISO
     end        TEXT NOT NULL,
     location   TEXT,
+    calendar   TEXT,                       -- delete: the calendar it's in
+    target     TEXT,                       -- delete: events.id
     model      TEXT,
     created_at TEXT NOT NULL,
-    status     TEXT NOT NULL DEFAULT 'pending' CHECK (status IN ('pending', 'added', 'skipped')),
+    status     TEXT NOT NULL DEFAULT 'pending' CHECK (status IN ('pending', 'done', 'skipped')),
     event_id   TEXT
 );
 -- Every model call (local or Claude): what it was for, how long, how many tokens.
@@ -172,8 +177,24 @@ def connect() -> sqlite3.Connection:
     conn = sqlite3.connect(DB_PATH)
     if not _schema_ready:
         conn.executescript(SCHEMA)
+        _migrate(conn)
         _schema_ready = True
     return conn
+
+
+def _migrate(conn: sqlite3.Connection) -> None:
+    """Bring tables made by older versions up to SCHEMA. Each step runs once."""
+    with conn:
+        if "editable" not in {r[1] for r in conn.execute("PRAGMA table_info(events)")}:
+            conn.execute("ALTER TABLE events ADD COLUMN editable INTEGER NOT NULL DEFAULT 1")
+        if "action" not in {r[1] for r in conn.execute("PRAGMA table_info(proposals)")}:
+            # v1 had no deletes, and called a carried-out proposal 'added'
+            conn.execute("ALTER TABLE proposals RENAME TO proposals_v1")
+            conn.executescript(SCHEMA)
+            conn.execute("INSERT INTO proposals (id, title, start, end, location, model, created_at, status, event_id)"
+                         " SELECT id, title, start, end, location, model, created_at,"
+                         " CASE status WHEN 'added' THEN 'done' ELSE status END, event_id FROM proposals_v1")
+            conn.execute("DROP TABLE proposals_v1")
 
 
 def now() -> str:
