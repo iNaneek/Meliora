@@ -126,6 +126,19 @@ CREATE TABLE IF NOT EXISTS events (
     PRIMARY KEY (id)
 );
 CREATE INDEX IF NOT EXISTS events_start ON events (start);
+-- Calendar events a model proposed in Ask. Pencil until Keenan confirms; then it's written
+-- to the "Meliora" calendar and event_id is its EventKit id.
+CREATE TABLE IF NOT EXISTS proposals (
+    id         INTEGER PRIMARY KEY AUTOINCREMENT,
+    title      TEXT NOT NULL,
+    start      TEXT NOT NULL,              -- local time, ISO
+    end        TEXT NOT NULL,
+    location   TEXT,
+    model      TEXT,
+    created_at TEXT NOT NULL,
+    status     TEXT NOT NULL DEFAULT 'pending' CHECK (status IN ('pending', 'added', 'skipped')),
+    event_id   TEXT
+);
 -- Every model call (local or Claude): what it was for, how long, how many tokens.
 CREATE TABLE IF NOT EXISTS llm_calls (
     at         TEXT NOT NULL,

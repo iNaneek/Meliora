@@ -65,8 +65,24 @@ def calendar_day(day: date) -> Day:
     return Day(blocks, None, {}, all_day, "calendar")
 
 
+def proposal_blocks(day: date) -> list[Block]:
+    """Events a model proposed in Ask, drawn as pencil until confirmed."""
+    from meliora import proposals
+
+    midnight = datetime.combine(day, datetime.min.time())
+    out = []
+    for p in proposals.pending(day):
+        start = max(0.0, (datetime.fromisoformat(p["start"]) - midnight).total_seconds() / 3600)
+        end = min(24.0, (datetime.fromisoformat(p["end"]) - midnight).total_seconds() / 3600)
+        sub = (p["location"] + " · " if p["location"] else "") + "proposed by " + proposals.short_model(p["model"])
+        out.append(Block(id=f"prop-{p['id']}", start=start, end=end, kind="pen", title=p["title"], sub=sub,
+                         where=p["location"] or ""))
+    return out
+
+
 def today_day(now: datetime) -> Day:
-    """The real calendar when it's connected, otherwise the demo day."""
+    """The real calendar when it's connected, otherwise the demo day. Pending proposals from
+    Ask are added on top as pencil blocks."""
     from meliora import calendars
 
     if calendars.connected():
@@ -75,8 +91,11 @@ def today_day(now: datetime) -> Day:
         except Exception:  # degrade honestly: keep the last copy in SQLite
             import logging
             logging.getLogger(__name__).exception("calendar refresh failed")
-        return calendar_day(now.date())
-    return demo_day()
+        day = calendar_day(now.date())
+    else:
+        day = demo_day()
+    day.blocks = sorted(day.blocks + proposal_blocks(now.date()), key=lambda b: b.start)
+    return day
 
 
 def fmt(h: float, ampm: bool = True) -> str:

@@ -14,6 +14,12 @@ medium = "qwen3:8b"        # Ask drawer, middle option
 big = "qwen3:30b-instruct" # Ask drawer, largest option
 ollama_url = "http://localhost:11434"
 # ollama_bin = "/Applications/Ollama.app/Contents/Resources/ollama"   # Meliora starts this itself, only when needed
+# Claude in Ask runs through `claude -p` on the Claude subscription (never the API). Aliases
+# always mean the newest model; pin a full id (e.g. "claude-sonnet-5-5") to hold one.
+haiku = "haiku"
+sonnet = "sonnet"
+opus = "opus"
+# claude_bin = "~/.local/bin/claude"   # default: PATH, ~/.local/bin, then the VS Code extension's copy
 
 [garmin]
 # History to fill with `uv run meliora-garmin backfill` (one time, resumable).

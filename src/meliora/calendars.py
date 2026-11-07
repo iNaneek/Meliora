@@ -1,8 +1,11 @@
-"""Apple Calendar collector (EventKit). Read-only for now: Meliora never writes here yet.
+"""Apple Calendar (EventKit): reads every calendar; writes only to its own "Meliora" calendar.
 
 EventKit reads the Mac's local copy of every calendar in the Calendar app (iCloud, Google,
 Exchange...), so it works offline. Events for yesterday through the next 3 weeks are copied
 into the `events` table, which the rest of the app reads.
+
+Writes happen only after Keenan confirms a proposal (pencil before ink), and only into a
+calendar named "Meliora", so a bad plan can be deleted in one step.
 
 Permission: macOS asks once ("Meliora would like to access your calendars"). The prompt only
 appears for the Dock app (its Info.plist says why it wants access), never under launchd.
@@ -15,6 +18,7 @@ from datetime import date, datetime, timedelta
 from meliora import config, db
 
 SOURCE = "calendar"
+OWN_CALENDAR = "Meliora"
 DAYS_BACK = 1
 DAYS_AHEAD = 21
 FRESH_FOR = timedelta(minutes=2)  # Today re-reads EventKit at most this often
@@ -104,16 +108,68 @@ def refresh(force: bool = False) -> int | None:
         return len(rows)
 
 
-def day_events(day: date) -> list[dict]:
-    """Events that overlap `day`, from SQLite, oldest first."""
-    lo = datetime.combine(day, datetime.min.time())
-    hi = lo + timedelta(days=1)
+def _own_calendar(store):
+    """The "Meliora" calendar, made on first use in the account new events go to (usually
+    iCloud, so it reaches the phone), or On My Mac if there's no account."""
+    ek = _ek()
+    for cal in store.calendarsForEntityType_(ek.EKEntityTypeEvent) or []:
+        if cal.title() == OWN_CALENDAR and cal.allowsContentModifications():
+            return cal
+    default = store.defaultCalendarForNewEvents()
+    source = default.source() if default else None
+    if source is None:
+        source = next((s for s in store.sources() or [] if s.sourceType() == ek.EKSourceTypeLocal), None)
+    if source is None:
+        raise RuntimeError("no calendar account to put the Meliora calendar in")
+    cal = ek.EKCalendar.calendarForEntityType_eventStore_(ek.EKEntityTypeEvent, store)
+    cal.setTitle_(OWN_CALENDAR)
+    cal.setSource_(source)
+    ok, err = store.saveCalendar_commit_error_(cal, True, None)
+    if not ok:
+        raise RuntimeError(f"couldn't make the Meliora calendar: {err}")
+    log.info("made the %s calendar in %s", OWN_CALENDAR, source.title())
+    return cal
+
+
+def add_event(title: str, start: datetime, end: datetime, location: str = "", notes: str = "") -> str:
+    """Write one event to the Meliora calendar. Returns its EventKit id. Call only after a Confirm."""
+    if status() != "granted":
+        raise PermissionError("Calendar isn't connected")
+    ek = _ek()
+    from Foundation import NSDate
+
+    with _lock:
+        store = ek.EKEventStore.alloc().init()
+        ev = ek.EKEvent.eventWithEventStore_(store)
+        ev.setTitle_(title)
+        ev.setStartDate_(NSDate.dateWithTimeIntervalSince1970_(start.timestamp()))
+        ev.setEndDate_(NSDate.dateWithTimeIntervalSince1970_(end.timestamp()))
+        if location:
+            ev.setLocation_(location)
+        if notes:
+            ev.setNotes_(notes)
+        ev.setCalendar_(_own_calendar(store))
+        ok, err = store.saveEvent_span_commit_error_(ev, ek.EKSpanThisEvent, True, None)
+        if not ok:
+            raise RuntimeError(f"Calendar didn't save the event: {err}")
+        return ev.eventIdentifier()
+
+
+def range_events(start: date, days: int) -> list[dict]:
+    """Events overlapping [start, start + days), from SQLite, oldest first."""
+    lo = datetime.combine(start, datetime.min.time())
+    hi = lo + timedelta(days=days)
     with db.session() as conn:
         rows = conn.execute(
             "SELECT id, calendar, title, start, end, all_day, location FROM events"
             " WHERE start < ? AND end > ? ORDER BY start", (hi.isoformat(), lo.isoformat())).fetchall()
     keys = ("id", "calendar", "title", "start", "end", "all_day", "location")
     return [dict(zip(keys, r)) for r in rows]
+
+
+def day_events(day: date) -> list[dict]:
+    """Events that overlap `day`, from SQLite, oldest first."""
+    return range_events(day, 1)
 
 
 def connected() -> bool:

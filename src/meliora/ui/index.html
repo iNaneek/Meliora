@@ -125,11 +125,14 @@
     <aside class="drawer glass" id="drawer" aria-label="Ask">
       <div class="dh">
         <b>Ask</b>
-        <div class="seg small" id="tiers" role="group" aria-label="Model"></div>
         <button class="btn ghost" id="close">Close</button>
       </div>
+      <div class="pick">
+        <div class="grp"><span>On this Mac</span><div class="seg small" id="tiers" role="group" aria-label="On-device model"></div></div>
+        <div class="grp"><span>Claude</span><div class="seg small" id="ctiers" role="group" aria-label="Claude model"></div></div>
+      </div>
       <div class="msgs" id="msgs">
-        <div class="m a">Ask about today: your schedule, the weather, or how your body numbers look. Answers come from a model on this Mac.</div>
+        <div class="m a" id="hello"></div>
       </div>
       <form class="compose" id="compose"><input id="q" placeholder="Ask about your day…" autocomplete="off"></form>
     </aside>

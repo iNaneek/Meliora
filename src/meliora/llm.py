@@ -2,10 +2,11 @@
 
 Local first: Ollama (Qwen3) runs on the Mac, free and offline. Callers always have a
 plain-Python fallback, because the model may be off, slow, or say something unusable.
-Claude (`claude -p`) gets added here when a feature needs it.
+Claude runs through `claude -p` (Claude Code on Keenan's subscription), never the API directly.
 """
 
 import atexit
+import glob
 import json
 import logging
 import os
@@ -25,6 +26,9 @@ log = logging.getLogger(__name__)
 DEFAULTS = {"fast": "qwen3:4b-instruct", "medium": "qwen3:8b", "big": "qwen3:30b-instruct",
             "ollama_url": "http://localhost:11434",
             "ollama_bin": "/Applications/Ollama.app/Contents/Resources/ollama"}
+# Claude models by alias, so each always means the newest Haiku / Sonnet / Opus.
+CLAUDE_DEFAULTS = {"haiku": "haiku", "sonnet": "sonnet", "opus": "opus"}
+CLAUDE_TIERS = [("haiku", "Haiku"), ("sonnet", "Sonnet"), ("opus", "Opus")]
 # The Ask drawer's model switch: tier, short label, rough download size.
 TIERS = [("fast", "4B", "2.5 GB"), ("medium", "8B", "5.2 GB"), ("big", "30B", "18.6 GB")]
 KEEP_ALIVE = "5m"  # the model leaves memory (~3 GB) 5 min after its last use
@@ -38,7 +42,7 @@ class Unavailable(Exception):
 
 
 def settings() -> dict:
-    return {**DEFAULTS, **config.load().get("models", {})}
+    return {**DEFAULTS, **CLAUDE_DEFAULTS, **config.load().get("models", {})}
 
 
 # ---------- the Ollama server: started on first use, stopped when Meliora quits ----------
@@ -135,13 +139,13 @@ def shutdown() -> None:
 atexit.register(shutdown)
 
 
-def _log(model: str, task: str, ms: int, tin, tout, ok: bool, detail: str = "") -> None:
+def _log(model: str, task: str, ms: int, tin, tout, ok: bool, detail: str = "", backend: str = "ollama") -> None:
     try:
         with db.session() as conn:
             conn.execute(
                 "INSERT INTO llm_calls (at, backend, model, task, ms, tokens_in, tokens_out, ok, detail)"
-                " VALUES (?, 'ollama', ?, ?, ?, ?, ?, ?, ?)",
-                (db.now(), model, task, ms, tin, tout, int(ok), detail[:200]))
+                " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                (db.now(), backend, model, task, ms, tin, tout, int(ok), detail[:200]))
     except Exception:
         log.exception("couldn't log model call")
 
@@ -234,3 +238,71 @@ def warm(tier: str = "fast") -> None:
         _post("/api/generate", {"model": model, "keep_alive": KEEP_ALIVE, "options": {"num_ctx": NUM_CTX}}, 60)
     except (Unavailable, urllib.error.URLError, OSError, ValueError):
         log.info("warm %s failed", model)
+
+
+# ---------- Claude (`claude -p`) ----------
+# Billing: `claude -p` uses Keenan's Claude subscription only while ANTHROPIC_API_KEY is
+# unset (with it set, Claude Code bills the API per token), so it's always removed here.
+# Each call is one stateless question: no tools, no saved session, no CLAUDE.md or
+# settings loaded, so the prompt is only what Meliora sends.
+
+def claude_bin() -> str | None:
+    """`claude` from config, PATH, the usual install spots, or the VS Code extension."""
+    s = config.load().get("models", {}).get("claude_bin")
+    if s and os.path.exists(os.path.expanduser(s)):
+        return os.path.expanduser(s)
+    home = Path.home()
+    found = [shutil.which("claude"), str(home / ".local/bin/claude"), str(home / ".claude/local/claude"),
+             "/opt/homebrew/bin/claude", "/usr/local/bin/claude"]
+    for f in found:
+        if f and os.path.exists(f):
+            return f
+    ext = sorted(glob.glob(str(home / ".vscode/extensions/anthropic.claude-code-*/resources/native-binary/claude")),
+                 key=lambda p: [int(x) if x.isdigit() else 0 for x in
+                                p.split("claude-code-")[1].split("-")[0].split(".")])
+    return ext[-1] if ext else None
+
+
+def claude_tiers() -> list[dict]:
+    s, ok = settings(), bool(claude_bin())
+    return [{"tier": t, "label": label, "model": s[t], "installed": ok, "backend": "claude"} for t, label in CLAUDE_TIERS]
+
+
+def claude_json(task: str, system: str, user: str, schema: dict, tier: str = "sonnet",
+                timeout: float = 180) -> tuple[dict, dict]:
+    """One Claude call that must answer as JSON matching `schema`. Returns (data, info).
+    Raises Unavailable when offline, signed out, or the reply is unusable."""
+    alias = settings()[tier]
+    exe = claude_bin()
+    t0 = time.monotonic()
+    ms = lambda: int((time.monotonic() - t0) * 1000)  # noqa: E731
+    if not exe:
+        _log(alias, task, 0, None, None, False, "claude not found", "claude")
+        raise Unavailable("Claude Code isn't installed")
+    cwd = config.DATA_DIR / "claude"  # empty folder: no project CLAUDE.md gets pulled in
+    cwd.mkdir(parents=True, exist_ok=True)
+    env = {k: v for k, v in os.environ.items() if k != "ANTHROPIC_API_KEY"}
+    cmd = [exe, "-p", "--model", alias, "--output-format", "json", "--tools", "",
+           "--no-session-persistence", "--setting-sources", "", "--strict-mcp-config",
+           "--system-prompt", system, "--json-schema", json.dumps(schema)]
+    try:
+        r = subprocess.run(cmd, input=user, capture_output=True, text=True, timeout=timeout, cwd=cwd, env=env)
+        out = json.loads(r.stdout) if r.stdout.strip() else {}
+    except subprocess.TimeoutExpired as e:
+        _log(alias, task, ms(), None, None, False, "timeout", "claude")
+        raise Unavailable("Claude took too long") from e
+    except ValueError:
+        out = {}
+    usage = out.get("modelUsage") or {}
+    model = next(iter(usage), alias)  # the full model name behind the alias
+    tin = sum(u.get("inputTokens", 0) + u.get("cacheCreationInputTokens", 0) + u.get("cacheReadInputTokens", 0)
+              for u in usage.values()) or None
+    tout = sum(u.get("outputTokens", 0) for u in usage.values()) or None
+    data = out.get("structured_output")
+    if r.returncode != 0 or out.get("is_error") or not isinstance(data, dict):
+        why = (out.get("result") or r.stderr or r.stdout or "no output").strip()[:200]
+        _log(model, task, ms(), tin, tout, False, why, "claude")
+        raise Unavailable(why)
+    info = {"model": model, "ms": ms(), "tokens_in": tin, "tokens_out": tout}
+    _log(model, task, info["ms"], tin, tout, True, "", "claude")
+    return data, info

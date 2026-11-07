@@ -8,7 +8,7 @@ from pathlib import Path
 
 import webview
 
-from meliora import body, calendars, chat, config, db, garmin, llm, overview, rules, weather
+from meliora import body, calendars, chat, config, db, garmin, llm, overview, proposals, rules, weather
 
 UI = Path(__file__).parent / "ui" / "index.html"
 
@@ -23,6 +23,9 @@ class Api:
     def decide(self, block_id: str, decision: str) -> dict:
         if decision not in ("confirm", "decline"):
             raise ValueError(decision)
+        if block_id.startswith("prop-"):  # an event proposed in Ask: Confirm writes it to Calendar
+            r = self.proposal(int(block_id[5:]), "add" if decision == "confirm" else "skip")
+            return {**self.today(), "msg": r["msg"]}
         # Pencil before ink: this only records the choice. Nothing is written to Calendar yet.
         db.record_decision(date.today().isoformat(), block_id, decision)
         return self.today()
@@ -81,16 +84,35 @@ class Api:
         return {"name": h["name"], "lat": h["lat"], "lon": h["lon"]}
 
     def ask(self, text: str, tier: str = "fast", history: list | None = None) -> dict:
-        """The Ask drawer. Slow (local model); pywebview runs this off the UI thread."""
+        """The Ask drawer. Slow (a model call); pywebview runs this off the UI thread."""
+        if tier in dict(llm.CLAUDE_TIERS):
+            return chat.answer_claude(str(text)[:4000], history or [], tier)
         if tier not in dict((t, 1) for t, _, _ in llm.TIERS):
             tier = "fast"
         return chat.answer(str(text)[:2000], history or [], tier)
 
     def chat_models(self) -> list:
-        return llm.tiers()
+        return llm.tiers() + llm.claude_tiers()
+
+    def proposal(self, pid: int, action: str) -> dict:
+        """Confirm ("add") writes the event to the Meliora calendar; "skip" drops it."""
+        pid = int(pid)
+        if action == "skip":
+            return {"ok": True, "proposal": proposals.skip(pid), "msg": "Skipped. Nothing was added."}
+        try:
+            p = proposals.confirm(pid)
+        except PermissionError:
+            return {"ok": False, "proposal": proposals.get(pid),
+                    "msg": "Connect Calendar first (sidebar), then confirm again."}
+        except Exception as e:
+            logging.exception("adding proposal %s failed", pid)
+            return {"ok": False, "proposal": proposals.get(pid), "msg": f"Calendar didn't take it: {e}"[:200]}
+        return {"ok": True, "proposal": p, "msg": f"Added to your Meliora calendar: {p['title']}."}
 
     def chat_warm(self, tier: str = "fast") -> None:
         """Drawer opened: load the model in the background so the first answer is quicker."""
+        if tier in dict(llm.CLAUDE_TIERS):
+            return  # nothing to load for Claude
         threading.Thread(target=llm.warm, args=(tier,), daemon=True).start()
 
 
